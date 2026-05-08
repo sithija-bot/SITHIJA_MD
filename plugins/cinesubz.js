@@ -1,164 +1,103 @@
 const axios = require("axios");
+const cheerio = require("cheerio");
 const { cmd } = require("../command");
 
 cmd(
   {
     pattern: "movie",
-    alias: ["film", "cinema"],
-    desc: "Search movies from Cinesubz",
+    alias: ["cinesubz", "cinetv"],
+    desc: "CineSubz Movie Search",
     category: "movie",
     react: "🎬",
     filename: __filename,
   },
   async (conn, mek, m, { from, q, reply }) => {
     try {
+
       if (!q) {
-        return reply("❌ Please give a movie name");
+        return reply("❌ Movie name ekak denna");
       }
 
-      // SEARCH MOVIE
-      const searchApi = `https://api-dark-shan-yt.koyeb.app/movie/cinesubz-search?text=${encodeURIComponent(q)}`;
+      // SEARCH PAGE
+      const searchUrl = `https://cinesubz.co/?s=${encodeURIComponent(q)}`;
 
-      const search = await axios.get(searchApi, {
+      const searchRes = await axios.get(searchUrl, {
         headers: {
-          Accept: "application/json",
-        },
-        timeout: 15000,
+          "User-Agent": "Mozilla/5.0"
+        }
       });
 
-      // CHECK SEARCH DATA
-      if (!search.data) {
-        return reply("❌ No response from API");
-      }
+      const $ = cheerio.load(searchRes.data);
 
-      console.log("SEARCH DATA :", search.data);
+      // FIRST RESULT
+      const first = $("article").first();
 
-      // GET RESULT ARRAY
-      let results =
-        search.data.result ||
-        search.data.results ||
-        search.data.data ||
-        [];
+      const title =
+        first.find("h2").text().trim() ||
+        "Unknown";
 
-      if (!Array.isArray(results) || results.length === 0) {
+      const link =
+        first.find("a").attr("href");
+
+      const image =
+        first.find("img").attr("src");
+
+      if (!link) {
         return reply("❌ Movie not found");
       }
 
-      // FIRST RESULT
-      const first = results[0];
-
-      const movieUrl =
-        first.url ||
-        first.link ||
-        first.movie_url;
-
-      if (!movieUrl) {
-        return reply("❌ Movie URL not found");
-      }
-
-      // INFO API
-      const infoApi = `https://api-dark-shan-yt.koyeb.app/movie/cinesubz-info?url=${encodeURIComponent(movieUrl)}`;
-
-      const info = await axios.get(infoApi, {
+      // MOVIE PAGE
+      const movieRes = await axios.get(link, {
         headers: {
-          Accept: "application/json",
-        },
-        timeout: 15000,
+          "User-Agent": "Mozilla/5.0"
+        }
       });
 
-      if (!info.data) {
-        return reply("❌ Failed to fetch movie info");
-      }
+      const $$ = cheerio.load(movieRes.data);
 
-      console.log("INFO DATA :", info.data);
-
-      // MOVIE OBJECT
-      const movie =
-        info.data.result ||
-        info.data.data ||
-        info.data;
-
-      // SAFE VALUES
-      const title =
-        movie.title ||
-        movie.name ||
-        "Unknown Movie";
-
-      const year =
-        movie.year ||
-        "N/A";
-
-      const rating =
-        movie.rating ||
-        "N/A";
-
-      const genre =
-        movie.genre ||
-        movie.genres ||
-        "N/A";
-
-      const language =
-        movie.language ||
-        "N/A";
-
-      const runtime =
-        movie.runtime ||
-        movie.duration ||
-        "N/A";
-
+      // DESCRIPTION
       const description =
-        movie.description ||
-        movie.plot ||
-        "No description available";
+        $$("meta[name='description']").attr("content") ||
+        "No description";
 
-      const image =
-        movie.image ||
-        movie.poster ||
-        "https://i.ibb.co/2kRZ6qR/no-image.jpg";
+      // DOWNLOAD LINKS
+      let downloads = "";
 
-      // DOWNLOADS
-      let downloadText = "";
+      $$("a").each((i, el) => {
 
-      const downloads =
-        movie.downloads ||
-        movie.download ||
-        [];
+        const href = $$(el).attr("href");
+        const text = $$(el).text();
 
-      if (Array.isArray(downloads) && downloads.length > 0) {
-        downloadText += "\n📥 *Download Links*\n";
+        if (
+          href &&
+          (
+            text.includes("Download") ||
+            text.includes("1080") ||
+            text.includes("720") ||
+            text.includes("480")
+          )
+        ) {
 
-        downloads.forEach((d, i) => {
-          const quality =
-            d.quality ||
-            d.name ||
-            `Link ${i + 1}`;
+          downloads += `\n🔗 ${text}\n${href}\n`;
+        }
 
-          const link =
-            d.link ||
-            d.url ||
-            "No link";
+      });
 
-          downloadText += `\n${i + 1}. ${quality}\n${link}\n`;
-        });
+      if (!downloads) {
+        downloads = "\n❌ Download links not found";
       }
 
-      // FINAL MESSAGE
+      // FINAL MSG
       const msg = `
 🎬 *${title}*
 
-⭐ Rating : ${rating}
-📅 Year : ${year}
-🎭 Genre : ${genre}
-🗣️ Language : ${language}
-⏱️ Runtime : ${runtime}
+📝 ${description}
 
-📝 Description :
-${description}
-
-${downloadText}
+📥 *Download Links*
+${downloads}
 `;
 
-      // SEND MESSAGE
+      // SEND
       await conn.sendMessage(
         from,
         {
@@ -169,11 +108,11 @@ ${downloadText}
       );
 
     } catch (err) {
-      console.log("MOVIE ERROR :", err);
 
-      return reply(
-        "❌ Error Fetching Movie\n\n" +
-          err.message
+      console.log(err);
+
+      reply(
+        `❌ Error Fetching Movie\n\n${err.message}`
       );
     }
   }

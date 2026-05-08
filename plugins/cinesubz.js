@@ -1,12 +1,13 @@
-const cloudscraper = require("cloudscraper");
-const cheerio = require("cheerio");
+const axios = require("axios");
 const { cmd } = require("../command");
+
+const API_KEY = "564727fa";
 
 cmd(
   {
     pattern: "movie",
-    alias: ["cinesubz"],
-    desc: "Search movies from CineSubz",
+    alias: ["film"],
+    desc: "Movie Search",
     category: "movie",
     react: "🎬",
     filename: __filename,
@@ -14,104 +15,47 @@ cmd(
   async (conn, mek, m, { from, q, reply }) => {
     try {
 
-      if (!q) {
+      if (!q)
         return reply("❌ Movie name ekak denna");
-      }
 
-      // SEARCH
-      const searchUrl =
-        `https://cinesubz.co/?s=${encodeURIComponent(q)}`;
+      // SEARCH MOVIE
+      const res = await axios.get(
+        `https://www.omdbapi.com/?apikey=${API_KEY}&t=${encodeURIComponent(q)}`
+      );
 
-      const body = await cloudscraper.get(searchUrl);
+      const movie = res.data;
 
-      const $ = cheerio.load(body);
-
-      let movieLink = null;
-      let title = null;
-      let image = null;
-
-      $("article").each((i, el) => {
-
-        const link = $(el)
-          .find("a")
-          .attr("href");
-
-        const text = $(el)
-          .find("h2")
-          .text()
-          .trim();
-
-        const img = $(el)
-          .find("img")
-          .attr("src");
-
-        if (link && !movieLink) {
-          movieLink = link;
-          title = text;
-          image = img;
-        }
-
-      });
-
-      if (!movieLink) {
+      if (movie.Response === "False") {
         return reply("❌ Movie not found");
       }
 
-      // MOVIE PAGE
-      const movieBody =
-        await cloudscraper.get(movieLink);
+      let msg = `
+🎬 *${movie.Title}*
 
-      const $$ = cheerio.load(movieBody);
+📅 Year : ${movie.Year}
+⭐ Rating : ${movie.imdbRating}
+🎭 Genre : ${movie.Genre}
+🌍 Country : ${movie.Country}
+🗣️ Language : ${movie.Language}
+⏱️ Runtime : ${movie.Runtime}
+🎞️ Type : ${movie.Type}
 
-      // DESCRIPTION
-      const description =
-        $$("meta[name='description']")
-          .attr("content") ||
-        "No description";
+👨‍🎤 Actors :
+${movie.Actors}
 
-      // DOWNLOAD LINKS
-      let links = "";
+📝 Plot :
+${movie.Plot}
 
-      $$("a").each((i, el) => {
-
-        const href = $$(el).attr("href");
-        const text = $$(el).text().trim();
-
-        if (
-          href &&
-          (
-            text.includes("720") ||
-            text.includes("1080") ||
-            text.includes("480") ||
-            text.toLowerCase().includes("download")
-          )
-        ) {
-
-          links += `\n🔗 ${text}\n${href}\n`;
-
-        }
-
-      });
-
-      if (!links) {
-        links = "\n❌ Download links not found";
-      }
-
-      // FINAL MESSAGE
-      const msg = `
-🎬 *${title}*
-
-📝 ${description}
-
-📥 *Download Links*
-${links}
+🔗 IMDB :
+https://www.imdb.com/title/${movie.imdbID}
 `;
 
-      // SEND
       await conn.sendMessage(
         from,
         {
-          image: { url: image },
+          image: {
+            url: movie.Poster
+          },
           caption: msg,
         },
         { quoted: mek }
@@ -122,7 +66,8 @@ ${links}
       console.log(e);
 
       reply(
-        `❌ Error Fetching Movie\n\n${e.message}`
+        "❌ Error Fetching Movie\n\n" +
+        e.message
       );
     }
   }

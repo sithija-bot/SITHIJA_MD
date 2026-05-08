@@ -1,80 +1,35 @@
-```js
-const { cmd, commands } = require("../command");
+```js id="0o4skd"
+const { cmd } = require("../command");
 
 cmd(
   {
     pattern: "menu",
-    alias: ["allmenu", "panel"],
-    desc: "Show all commands",
+    desc: "Show menu",
     category: "main",
     react: "📜",
     filename: __filename,
   },
-  async (
-    conn,
-    mek,
-    m,
-    {
-      from,
-      pushname,
-      reply,
-    }
-  ) => {
+  async (conn, mek, m, { from, pushname, reply }) => {
+
     try {
 
-      let menu = `
-╭━━〔 *SITHIJA MD* 〕━━⬣
-┃👤 User : ${pushname}
-┃⚡ Prefix : .
-┃🤖 Mode : Public
-┃📦 Commands : ${Object.keys(commands).length}
+      const menu = `
+╭━━━〔 SITHIJA MD 〕━━━⬣
+┃ User : ${pushname}
+┃ Prefix : .
 ╰━━━━━━━━━━━━━━⬣
 
+➤ .menu
+➤ .alive
+➤ .ping
+
+> Powered By Sithija MD
 `;
 
-      const categories = {};
-
-      // GROUP COMMANDS
-      for (let command in commands) {
-
-        const cmdData = commands[command];
-
-        if (!cmdData.pattern) continue;
-
-        const category =
-          cmdData.category || "misc";
-
-        if (!categories[category]) {
-          categories[category] = [];
-        }
-
-        categories[category].push(
-          cmdData.pattern
-        );
-      }
-
-      // CREATE MENU
-      for (let cat in categories) {
-
-        menu += `╭━━〔 *${cat.toUpperCase()}* 〕━━⬣\n`;
-
-        for (let cmdName of categories[cat]) {
-          menu += `┃➤ .${cmdName}\n`;
-        }
-
-        menu += `╰━━━━━━━━━━━━━━⬣\n\n`;
-      }
-
-      menu += `> © Powered By Sithija MD`;
-
-      // SEND MESSAGE
       await conn.sendMessage(
         from,
         {
-          image: {
-            url: "https://files.catbox.moe/afw0u7.jpg",
-          },
-          caption: menu,
+          text: menu,
         },
         { quoted: mek }
       );
@@ -83,9 +38,10 @@ cmd(
 
       console.log(e);
 
-      reply("❌ Error loading menu");
+      reply("Error");
 
     }
+
   }
 );
 ```

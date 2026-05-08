@@ -33,6 +33,7 @@
     "util": "latest",
     "vm": "latest",
     "puppeteer": "latest",
-    "cloudscraper": "latest"
+    "cloudscraper": "latest",
+    "@xaviabot/fb-downloader": "latest"
   }
 }

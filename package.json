@@ -32,6 +32,7 @@
     "tmp": "latest",
     "util": "latest",
     "vm": "latest",
-    "puppeteer": "latest"
+    "puppeteer": "latest",
+    "cloudscraper": "latest"
   }
 }

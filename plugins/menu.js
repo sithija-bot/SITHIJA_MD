@@ -5,7 +5,7 @@ cmd(
   {
     pattern: "menu",
     alias: ["allmenu", "panel"],
-    desc: "Show bot command menu",
+    desc: "Show all commands",
     category: "main",
     react: "📜",
     filename: __filename,
@@ -67,12 +67,12 @@ cmd(
 
       menu += `> © Powered By Sithija MD`;
 
-      // SEND MENU
+      // SEND MESSAGE
       await conn.sendMessage(
         from,
         {
           image: {
-            url: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/ChatGPT%20Image%20May%208,%202026,%2006_22_57%20PM.png?raw=true"
+            url: "https://files.catbox.moe/afw0u7.jpg",
           },
           caption: menu,
         },

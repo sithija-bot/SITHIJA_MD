@@ -85,9 +85,9 @@ async function connectToWA() {
         connectToWA();
       }
     } else if (connection === 'open') {
-      console.log('✅  connected to WhatsApp');
+      console.log('✅ SITHIJA-MD connected to WhatsApp');
 
-      const up = ` connected ✅\n\nPREFIX: ${prefix}`;
+      const up = `SITHIJA-MD connected ✅\n\nPREFIX: ${prefix}`;
       await sithija.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
         image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/ChatGPT%20Image%20May%208,%202026,%2006_22_57%20PM.png?raw=true` },
         caption: up

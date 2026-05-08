@@ -35,6 +35,8 @@
     "puppeteer": "latest",
     "cloudscraper": "latest",
     "@xaviabot/fb-downloader": "latest",
-    "abir-photo360-apis": "latest"
+    "abir-photo360-apis": "latest",
+    "yt-search": "latest",
+    "sadaslk-dlcore": "latest"
   }
 }

@@ -34,6 +34,7 @@
     "vm": "latest",
     "puppeteer": "latest",
     "cloudscraper": "latest",
-    "@xaviabot/fb-downloader": "latest"
+    "@xaviabot/fb-downloader": "latest",
+    "abir-photo360-apis": "latest"
   }
 }

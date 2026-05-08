@@ -3,253 +3,178 @@ const { cmd } = require("../command");
 
 cmd(
   {
-    pattern: "cine",
-    desc: "Search Movies From CineSubz",
+    pattern: "movie",
+    alias: ["film", "cinema"],
+    desc: "Search movies from Cinesubz",
     category: "movie",
+    react: "🎬",
     filename: __filename,
   },
-  async (
-    sithija,
-    mek,
-    m,
-    {
-      from,
-      q,
-      reply
-    }
-  ) => {
-
+  async (conn, mek, m, { from, q, reply }) => {
     try {
+      if (!q) {
+        return reply("❌ Please give a movie name");
+      }
 
-      if (!q)
-        return reply(
-`🎬 Example:
-.cine spiderman`
-        );
+      // SEARCH MOVIE
+      const searchApi = `https://api-dark-shan-yt.koyeb.app/movie/cinesubz-search?text=${encodeURIComponent(q)}`;
 
-      // SEARCH
-      const search = await axios.get(
-        `https://api-dark-shan-yt.koyeb.app/movie/cinesubz-search?query=${encodeURIComponent(q)}`
-      );
+      const search = await axios.get(searchApi, {
+        headers: {
+          Accept: "application/json",
+        },
+        timeout: 15000,
+      });
 
-      const results =
+      // CHECK SEARCH DATA
+      if (!search.data) {
+        return reply("❌ No response from API");
+      }
+
+      console.log("SEARCH DATA :", search.data);
+
+      // GET RESULT ARRAY
+      let results =
         search.data.result ||
         search.data.results ||
         search.data.data ||
         [];
 
-      if (!results.length)
-        return reply("❌ Movie Not Found");
+      if (!Array.isArray(results) || results.length === 0) {
+        return reply("❌ Movie not found");
+      }
 
-      const movie = results[0];
+      // FIRST RESULT
+      const first = results[0];
 
       const movieUrl =
-        movie.link ||
-        movie.url ||
-        movie.href;
+        first.url ||
+        first.link ||
+        first.movie_url;
 
-      // INFO
-      const info = await axios.get(
-        `https://api-dark-shan-yt.koyeb.app/movie/cinesubz-info?url=${encodeURIComponent(movieUrl)}`
-      );
+      if (!movieUrl) {
+        return reply("❌ Movie URL not found");
+      }
 
-      const data =
+      // INFO API
+      const infoApi = `https://api-dark-shan-yt.koyeb.app/movie/cinesubz-info?url=${encodeURIComponent(movieUrl)}`;
+
+      const info = await axios.get(infoApi, {
+        headers: {
+          Accept: "application/json",
+        },
+        timeout: 15000,
+      });
+
+      if (!info.data) {
+        return reply("❌ Failed to fetch movie info");
+      }
+
+      console.log("INFO DATA :", info.data);
+
+      // MOVIE OBJECT
+      const movie =
         info.data.result ||
         info.data.data ||
         info.data;
 
-      // DOWNLOAD
-      const dl = await axios.get(
-        `https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${encodeURIComponent(movieUrl)}`
-      );
+      // SAFE VALUES
+      const title =
+        movie.title ||
+        movie.name ||
+        "Unknown Movie";
+
+      const year =
+        movie.year ||
+        "N/A";
+
+      const rating =
+        movie.rating ||
+        "N/A";
+
+      const genre =
+        movie.genre ||
+        movie.genres ||
+        "N/A";
+
+      const language =
+        movie.language ||
+        "N/A";
+
+      const runtime =
+        movie.runtime ||
+        movie.duration ||
+        "N/A";
+
+      const description =
+        movie.description ||
+        movie.plot ||
+        "No description available";
+
+      const image =
+        movie.image ||
+        movie.poster ||
+        "https://i.ibb.co/2kRZ6qR/no-image.jpg";
+
+      // DOWNLOADS
+      let downloadText = "";
 
       const downloads =
-        dl.data.downloads ||
-        dl.data.links ||
-        dl.data.result ||
+        movie.downloads ||
+        movie.download ||
         [];
 
-      let links = "";
+      if (Array.isArray(downloads) && downloads.length > 0) {
+        downloadText += "\n📥 *Download Links*\n";
 
-      if (Array.isArray(downloads)) {
+        downloads.forEach((d, i) => {
+          const quality =
+            d.quality ||
+            d.name ||
+            `Link ${i + 1}`;
 
-        downloads.forEach((v, i) => {
+          const link =
+            d.link ||
+            d.url ||
+            "No link";
 
-          if (typeof v === "string") {
-
-            links += `🔗 ${i + 1}. ${v}\n\n`;
-
-          } else {
-
-            links += `🎥 ${v.quality || "Quality"}\n`;
-            links += `📦 ${v.size || "Unknown"}\n`;
-            links += `🔗 ${v.url || v.link}\n\n`;
-
-          }
-
+          downloadText += `\n${i + 1}. ${quality}\n${link}\n`;
         });
-
       }
 
-      const caption = `
-╭━━〔 🎬 SITHIJA-MD MOVIE 〕━━⬣
-┃ 🎥 ${data.title || movie.title}
-┃ ⭐ ${data.imdb || "N/A"}
-┃ 📅 ${data.year || "N/A"}
-┃ 🎭 ${data.genre || "N/A"}
-╰━━━━━━━━━━━━━━⬣
+      // FINAL MESSAGE
+      const msg = `
+🎬 *${title}*
 
-📥 DOWNLOAD LINKS
+⭐ Rating : ${rating}
+📅 Year : ${year}
+🎭 Genre : ${genre}
+🗣️ Language : ${language}
+⏱️ Runtime : ${runtime}
 
-${links || "No Links Found"}
+📝 Description :
+${description}
+
+${downloadText}
 `;
 
-      const image =
-        data.image ||
-        data.poster ||
-        movie.image ||
-        movie.poster;
-
-      if (image) {
-
-        return await sithija.sendMessage(
-          from,
-          {
-            image: { url: image },
-            caption
-          },
-          { quoted: mek }
-        );
-
-      }
-
-      return reply(caption);
-
-    } catch (e) {
-
-      console.log(e);
-
-      return reply("❌ Error Fetching Movie");
-
-    }
-  }
-);
-
-// =======================================
-// TV SERIES
-// =======================================
-
-cmd(
-  {
-    pattern: "cinetv",
-    desc: "Search TV Series From CineSubz",
-    category: "tv",
-    filename: __filename,
-  },
-  async (
-    sithija,
-    mek,
-    m,
-    {
-      from,
-      q,
-      reply
-    }
-  ) => {
-
-    try {
-
-      if (!q)
-        return reply(
-`📺 Example:
-.cinetv stranger things`
-        );
-
-      // SEARCH
-      const search = await axios.get(
-        `https://api-dark-shan-yt.koyeb.app/movie/cinesubz-search?query=${encodeURIComponent(q)}`
+      // SEND MESSAGE
+      await conn.sendMessage(
+        from,
+        {
+          image: { url: image },
+          caption: msg,
+        },
+        { quoted: mek }
       );
 
-      const results =
-        search.data.result ||
-        search.data.results ||
-        search.data.data ||
-        [];
+    } catch (err) {
+      console.log("MOVIE ERROR :", err);
 
-      if (!results.length)
-        return reply("❌ TV Series Not Found");
-
-      const tv = results[0];
-
-      const tvUrl =
-        tv.link ||
-        tv.url ||
-        tv.href;
-
-      // TV INFO
-      const info = await axios.get(
-        `https://api-dark-shan-yt.koyeb.app/tv/cinesubz-info?url=${encodeURIComponent(tvUrl)}`
+      return reply(
+        "❌ Error Fetching Movie\n\n" +
+          err.message
       );
-
-      const data =
-        info.data.result ||
-        info.data.data ||
-        info.data;
-
-      const episodes =
-        data.episodes ||
-        [];
-
-      let epText = "";
-
-      if (Array.isArray(episodes)) {
-
-        episodes.slice(0, 20).forEach((v, i) => {
-
-          epText += `🎬 ${i + 1}. ${v.title || v.name || v}\n`;
-
-        });
-
-      }
-
-      const caption = `
-╭━━〔 📺 SITHIJA-MD TV SERIES 〕━━⬣
-┃ 🎥 ${data.title || tv.title}
-┃ ⭐ ${data.imdb || "N/A"}
-┃ 📅 ${data.year || "N/A"}
-┃ 📀 ${data.seasons || "N/A"} Seasons
-╰━━━━━━━━━━━━━━⬣
-
-${epText || "No Episodes Found"}
-`;
-
-      const image =
-        data.image ||
-        data.poster ||
-        tv.image ||
-        tv.poster;
-
-      if (image) {
-
-        return await sithija.sendMessage(
-          from,
-          {
-            image: { url: image },
-            caption
-          },
-          { quoted: mek }
-        );
-
-      }
-
-      return reply(caption);
-
-    } catch (e) {
-
-      console.log(e);
-
-      return reply("❌ Error Fetching TV Series");
-
     }
   }
 );

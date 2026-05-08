@@ -1,12 +1,12 @@
-const axios = require("axios");
+const cloudscraper = require("cloudscraper");
 const cheerio = require("cheerio");
 const { cmd } = require("../command");
 
 cmd(
   {
     pattern: "movie",
-    alias: ["cinesubz", "cinetv"],
-    desc: "CineSubz Movie Search",
+    alias: ["cinesubz"],
+    desc: "Search movies from CineSubz",
     category: "movie",
     react: "🎬",
     filename: __filename,
@@ -18,83 +18,93 @@ cmd(
         return reply("❌ Movie name ekak denna");
       }
 
-      // SEARCH PAGE
-      const searchUrl = `https://cinesubz.co/?s=${encodeURIComponent(q)}`;
+      // SEARCH
+      const searchUrl =
+        `https://cinesubz.co/?s=${encodeURIComponent(q)}`;
 
-      const searchRes = await axios.get(searchUrl, {
-        headers: {
-          "User-Agent": "Mozilla/5.0"
+      const body = await cloudscraper.get(searchUrl);
+
+      const $ = cheerio.load(body);
+
+      let movieLink = null;
+      let title = null;
+      let image = null;
+
+      $("article").each((i, el) => {
+
+        const link = $(el)
+          .find("a")
+          .attr("href");
+
+        const text = $(el)
+          .find("h2")
+          .text()
+          .trim();
+
+        const img = $(el)
+          .find("img")
+          .attr("src");
+
+        if (link && !movieLink) {
+          movieLink = link;
+          title = text;
+          image = img;
         }
+
       });
 
-      const $ = cheerio.load(searchRes.data);
-
-      // FIRST RESULT
-      const first = $("article").first();
-
-      const title =
-        first.find("h2").text().trim() ||
-        "Unknown";
-
-      const link =
-        first.find("a").attr("href");
-
-      const image =
-        first.find("img").attr("src");
-
-      if (!link) {
+      if (!movieLink) {
         return reply("❌ Movie not found");
       }
 
       // MOVIE PAGE
-      const movieRes = await axios.get(link, {
-        headers: {
-          "User-Agent": "Mozilla/5.0"
-        }
-      });
+      const movieBody =
+        await cloudscraper.get(movieLink);
 
-      const $$ = cheerio.load(movieRes.data);
+      const $$ = cheerio.load(movieBody);
 
       // DESCRIPTION
       const description =
-        $$("meta[name='description']").attr("content") ||
+        $$("meta[name='description']")
+          .attr("content") ||
         "No description";
 
       // DOWNLOAD LINKS
-      let downloads = "";
+      let links = "";
 
       $$("a").each((i, el) => {
 
         const href = $$(el).attr("href");
-        const text = $$(el).text();
+        const text = $$(el).text().trim();
 
         if (
           href &&
           (
-            text.includes("Download") ||
-            text.includes("1080") ||
             text.includes("720") ||
-            text.includes("480")
+            text.includes("1080") ||
+            text.includes("480") ||
+            text.toLowerCase().includes("download")
           )
         ) {
 
-          downloads += `\n🔗 ${text}\n${href}\n`;
+          links += `\n🔗 ${text}\n${href}\n`;
+
         }
 
       });
 
-      if (!downloads) {
-        downloads = "\n❌ Download links not found";
+      if (!links) {
+        links = "\n❌ Download links not found";
       }
 
-      // FINAL MSG
+      // FINAL MESSAGE
       const msg = `
 🎬 *${title}*
 
 📝 ${description}
 
 📥 *Download Links*
-${downloads}
+${links}
 `;
 
       // SEND
@@ -107,12 +117,12 @@ ${downloads}
         { quoted: mek }
       );
 
-    } catch (err) {
+    } catch (e) {
 
-      console.log(err);
+      console.log(e);
 
       reply(
-        `❌ Error Fetching Movie\n\n${err.message}`
+        `❌ Error Fetching Movie\n\n${e.message}`
       );
     }
   }

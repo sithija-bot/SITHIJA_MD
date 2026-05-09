@@ -11,8 +11,7 @@ cmd(
     filename: __filename,
   },
   async (conn, mek, m, { args, reply, isOwner }) => {
-    if (!isOwner) return reply('❌ Owner only');
-
+ 
     const action = args[0];
 
     if (action === 'on') {

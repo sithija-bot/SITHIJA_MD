@@ -12,9 +12,7 @@ cmd(
   async (conn, mek, m, { reply, isOwner }) => {
     try {
       // Owner only
-      if (!isOwner) {
-        return reply('❌ Only bot owner can use this command');
-      }
+     
 
       await reply('♻️ Bot restarting...');
 

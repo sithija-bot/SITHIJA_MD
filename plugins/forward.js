@@ -3,19 +3,13 @@ const { cmd } = require("../command");
 cmd({
   pattern: "jid",
   react: "🆔",
-  desc: "Get current chat JID",
+  desc: "Get current chat jid",
   category: "owner",
   filename: __filename
 },
 async (conn, mek, m, { from, reply }) => {
 
-  return reply(
-`╭━━〔 CHAT JID 〕━━⬣
-
-🆔 ${from}
-
-╰━━━━━━━━━━━━━━⬣`
-  );
+  reply(`🆔 CHAT JID\n\n${from}`);
 
 });
 
@@ -23,40 +17,36 @@ async (conn, mek, m, { from, reply }) => {
 cmd({
   pattern: "forward",
   react: "📨",
-  desc: "Forward replied message to jid",
+  desc: "Forward replied message",
   category: "owner",
   filename: __filename
 },
 async (conn, mek, m, { q, reply }) => {
 
   if (!q) {
-    return reply(
-`📨 Example:
-
-.forward 947xxxxxxxx@s.whatsapp.net
-
-Reply to a message`
-    );
+    return reply("❌ Give target JID");
   }
 
   if (!mek.quoted) {
     return reply("❌ Reply to a message");
   }
 
- try {
+  try {
 
-  await conn.sendMessage(q, {
-    forward: mek.quoted.fakeObj
-  });
+    await conn.copyNForward(
+      q,
+      mek.quoted,
+      true
+    );
 
-  reply("✅ Message forwarded successfully");
+    reply("✅ Message forwarded");
 
-} catch (e) {
+  } catch (e) {
 
-  console.log(e);
+    console.log(e);
 
-  reply("❌ Failed to forward message");
+    reply("❌ Forward failed");
 
-}
+  }
 
 });

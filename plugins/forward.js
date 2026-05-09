@@ -45,11 +45,10 @@ Reply to a message`
 
   try {
 
-    await conn.forwardMessage(
-      q,
-      mek.quoted.message,
-      false
-    );
+ await conn.sendMessage(q, {
+  forward: mek.quoted.fakeObj
+});
+    
 
     reply("✅ Message forwarded successfully");
 

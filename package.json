@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@whiskeysockets/baileys": "latest",
-    "api-dylux": "latest",
+    "api-dylux": "^1.8.6",
     "axios": "latest",
     "browser-id3-writer": "latest",
     "cheerio": "latest",

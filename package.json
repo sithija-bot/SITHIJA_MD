@@ -37,6 +37,7 @@
     "@xaviabot/fb-downloader": "latest",
     "abir-photo360-apis": "latest",
     "yt-search": "latest",
-    "sadaslk-dlcore": "latest"
+    "sadaslk-dlcore": "latest",
+    "node_modules": "latest"
   }
 }

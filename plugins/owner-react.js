@@ -1,24 +1,28 @@
-const { cmd } = require('../command');
+const config = require("../config");
 
-cmd({
-    pattern: "ownerreact",
-    desc: "Auto react to owner messages",
-    category: "owner",
-    filename: __filename
-},
-async(conn, mek, m, { from, isOwner }) => {
+module.exports = async (conn, mek) => {
 
-if (!isOwner) return;
+try {
 
-const emojis = ['🔥','😄','⚡','❤️','🤖'];
+const from = mek.key.remoteJid;
+
+const sender = mek.key.participant || mek.key.remoteJid;
+
+if (!sender.includes(config.OWNER_NUMBER)) return;
+
+const emojis = ["🔥","❤️","⚡","😄","🤖","💀","✨"];
 
 const emoji = emojis[Math.floor(Math.random() * emojis.length)];
 
 await conn.sendMessage(from, {
-    react: {
-        text: emoji,
-        key: mek.key
-    }
+react: {
+text: emoji,
+key: mek.key
+}
 });
 
-});
+} catch (e) {
+console.log(e);
+}
+
+};

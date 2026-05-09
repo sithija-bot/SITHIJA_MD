@@ -43,21 +43,20 @@ Reply to a message`
     return reply("❌ Reply to a message");
   }
 
-  try {
+ try {
 
- await conn.sendMessage(q, {
-  forward: mek.quoted.fakeObj
-});
-    
+  await conn.sendMessage(q, {
+    forward: mek.quoted.fakeObj
+  });
 
-    reply("✅ Message forwarded successfully");
+  reply("✅ Message forwarded successfully");
 
-  } catch (e) {
+} catch (e) {
 
-    console.log(e);
+  console.log(e);
 
-    reply("❌ Failed to forward message");
+  reply("❌ Failed to forward message");
 
-  }
+}
 
 });

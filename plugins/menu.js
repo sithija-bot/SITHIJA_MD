@@ -57,13 +57,23 @@ cmd({
   const selectedCategory = categories[index];
   const cmdsInCategory = commandMap[selectedCategory];
 
-  let cmdText = `*${selectedCategory} COMMANDS*\n`;
-  cmdsInCategory.forEach(c => {
-    const patterns = [c.pattern, ...(c.alias || [])].filter(Boolean).map(p => `.${p}`);
-    cmdText += `${patterns.join(", ")} - ${c.desc || "No description"}\n`;
-  });
-  cmdText += `───────────────────────\n`;
-  cmdText += `Total Commands: ${cmdsInCategory.length}\n`;
+let cmdText = `╭━━〔 *${selectedCategory} COMMANDS* 〕━━⬣\n\n`;
+
+cmdsInCategory.forEach((c, i) => {
+
+  const patterns = [c.pattern, ...(c.alias || [])]
+    .filter(Boolean)
+    .map(p => `.${p}`);
+
+  cmdText += `┃ ${numberEmojis[i + 1] || "🔹"} *Command :*\n`;
+  cmdText += `┃ ➜ ${patterns.join(" , ")}\n`;
+  cmdText += `┃ 📄 *Desc :* ${c.desc || "No description"}\n`;
+  cmdText += `┃\n`;
+
+});
+
+cmdText += `╰━━━━━━━━━━━━━━━━━━⬣\n`;
+cmdText += `✨ Total Commands : ${cmdsInCategory.length}`;
 
   await test.sendMessage(from, {
     image: { url: headerImage },

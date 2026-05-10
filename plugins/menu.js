@@ -7,9 +7,21 @@ const numberEmojis = [
   "5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"
 ];
 
-const headerImage =
+// CATEGORY IMAGES
+const menuImages = {
+  MAIN: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.33.16.jpeg?raw=true",
+  DOWNLOAD: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.31.20.jpeg?raw=true",
+  GROUP: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.34.57.jpeg?raw=true",
+  OWNER: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.32.49.jpeg?raw=true",
+  MOVIE: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.34.11.jpeg?raw=true",
+  AI: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.35.23.jpeg?raw=true",
+  SEARCH: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.36.00.jpeg?raw=true",
+};
+
+const defaultImage =
   "https://raw.githubusercontent.com/sithija-bot/SITHIJA_MD/main/images/ChatGPT%20Image%20May%208,%202026,%2006_22_57%20PM.png";
 
+// MAIN MENU
 cmd(
   {
     pattern: "menu",
@@ -37,6 +49,7 @@ cmd(
         if (command.dontAddCommandList) continue;
         if (!command.category) continue;
         if (command.category.toLowerCase() === "misc") continue;
+
         const category = command.category.toUpperCase();
 
         if (!commandMap[category]) {
@@ -49,15 +62,15 @@ cmd(
       const categories = Object.keys(commandMap);
 
       let menuText = `
-╭──────────────────◆
-│  ⚡ *SITHIJA MD*
-│  👤 ${pushname}
-│  🚀 ONLINE MODE
-│  📦 ${commands.length} COMMANDS
-│  💻 VERSION 1.0.0
-╰──────────────────◆
+╭━━〔 ⚡ SITHIJA MD ⚡ 〕━━⬣
+┃ 👤 USER : ${pushname}
+┃ 🚀 STATUS : ONLINE
+┃ ⚡ SPEED : ${Math.floor(Math.random() * 100)}ms
+┃ 💻 VERSION : 1.0.0
+┃ 📦 COMMANDS : ${commands.length}
+╰━━━━━━━━━━━━━━⬣
 
-╭━━〔 *COMMAND LIST* 〕━━◆
+╭━━〔 COMMAND LIST 〕━━⬣
 `;
 
       categories.forEach((cat, i) => {
@@ -69,24 +82,16 @@ cmd(
             .map((n) => numberEmojis[n])
             .join("");
 
-        menuText += `┃ ${emoji} │ ${cat}\n`;
-        menuText += `┃     ╰➤ ${commandMap[cat].length} COMMANDS\n`;
+        menuText += `┃ ${emoji} ${cat}\n┃\n`;
       });
 
-      menuText += `╰━━━━━━━━━━━━━━━━◆
-
-╭──────────────────◆
-│ 💜 THE ULTIMATE BOT
-│ ⚡ FAST • SIMPLE • POWERFUL
-│ 👑 POWERED BY SITHIJA MD
-╰──────────────────◆
-`;
+      menuText += `╰━━━━━━━━━━━━━━⬣`;
 
       await test.sendMessage(
         from,
         {
           image: {
-            url: headerImage,
+            url: menuImages["MAIN"] || defaultImage,
           },
           caption: menuText,
           contextInfo: {
@@ -95,7 +100,7 @@ cmd(
             externalAdReply: {
               title: "SITHIJA MD",
               body: "MULTI DEVICE WHATSAPP BOT",
-              thumbnailUrl: headerImage,
+              thumbnailUrl: menuImages["MAIN"] || defaultImage,
               sourceUrl: "https://github.com/",
               mediaType: 1,
               renderLargerThumbnail: true,
@@ -121,6 +126,7 @@ cmd(
   }
 );
 
+// CATEGORY MENU
 cmd(
   {
     filter: (text, { sender }) =>
@@ -152,9 +158,7 @@ cmd(
       const cmdsInCategory = commandMap[selectedCategory];
 
       let cmdText = `
-╭──────────────────◆
-│ 📂 ${selectedCategory} MENU
-╰──────────────────◆
+╭━━〔 📂 ${selectedCategory} MENU 〕━━⬣
 
 `;
 
@@ -167,24 +171,20 @@ cmd(
           .filter(Boolean)
           .map((p) => `.${p}`);
 
-        cmdText += `╭━〔 ${numberEmojis[i + 1] || "🔹"} 〕━◆\n`;
-        cmdText += `┃ ⚡ ${patterns.join(" , ")}\n`;
+        cmdText += `┃ ${numberEmojis[i + 1] || "🔹"} ${patterns.join(" , ")}\n`;
         cmdText += `┃ 📄 ${c.desc || "NO DESCRIPTION"}\n`;
-        cmdText += `╰━━━━━━━━━━◆\n\n`;
+        cmdText += `┣━━━━━━━━━━━━⬣\n`;
       });
 
       cmdText += `
-╭──────────────────◆
-│ ✨ TOTAL : ${cmdsInCategory.length}
-│ 💜 SITHIJA MD
-╰──────────────────◆
+╰━━〔 ${cmdsInCategory.length} COMMANDS 〕━━⬣
 `;
 
       await test.sendMessage(
         from,
         {
           image: {
-            url: headerImage,
+            url: menuImages[selectedCategory] || defaultImage,
           },
           caption: cmdText,
           contextInfo: {
@@ -193,7 +193,7 @@ cmd(
             externalAdReply: {
               title: `${selectedCategory} MENU`,
               body: "SITHIJA MD WHATSAPP BOT",
-              thumbnailUrl: headerImage,
+              thumbnailUrl: menuImages[selectedCategory] || defaultImage,
               sourceUrl: "https://github.com/",
               mediaType: 1,
               renderLargerThumbnail: true,

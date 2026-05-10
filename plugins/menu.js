@@ -7,24 +7,8 @@ const numberEmojis = [
   "6️⃣","7️⃣","8️⃣","9️⃣","🔟"
 ];
 
-/*
-━━━━━━━━━━━━━━━━━━━━━━━━━━
- CATEGORY IMAGES
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-*/
-
-const categoryImages = {
-
-  DOWNLOAD: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.31.20.jpeg?raw=true",
-  SEARCH: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.36.00.jpeg?raw=true",
-  GROUP: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.34.57.jpeg?raw=true",
-  OWNER: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.32.49.jpeg?raw=true",
-  AI: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.35.23.jpeg?raw=true",
-  MOVIE: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.34.11.jpeg?raw=true"
-};
-
 const mainImage =
-  "https://raw.githubusercontent.com/sithija-bot/SITHIJA_MD/main/images/menu.jpg";
+  "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/ChatGPT%20Image%20May%2010,%202026,%2007_16_34%20PM.png?raw=true";
 
 cmd({
   pattern: "menu",
@@ -118,14 +102,6 @@ cmd({
   const selectedCategory = data.categories[index];
   const cmds = data.commandMap[selectedCategory];
 
-  /*
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━
-   CATEGORY IMAGE SELECT
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━
-  */
-
-  const categoryImage = categoryImages[selectedCategory];
-
   let text = `
 ╭━━━〔 *${selectedCategory} MENU* 〕━━━⬣
 
@@ -150,9 +126,11 @@ cmd({
 🌸 Total Commands : ${cmds.length}
 💖 Powered By SITHIJA MD`;
 
+  // CATEGORY IMAGE REMOVE
+  // ONLY TEXT MESSAGE SEND
+
   await conn.sendMessage(from, {
-    image: { url: categoryImage },
-    caption: text
+    text: text
   }, { quoted: m });
 
   delete pendingMenu[sender];

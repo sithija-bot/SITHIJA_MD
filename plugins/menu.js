@@ -18,7 +18,7 @@ const menuImages = {
 };
 
 const defaultImage =
-  "https://raw.githubusercontent.com/sithija-bot/SITHIJA_MD/main/images/ChatGPT%20Image%20May%208,%202026,%2006_22_57%20PM.png";
+  "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/ChatGPT%20Image%20May%2010,%202026,%2007_16_34%20PM.png?raw=true";
 
 // MAIN MENU
 cmd(

@@ -3,206 +3,157 @@ const { cmd, commands } = require("../command");
 const pendingMenu = {};
 
 const numberEmojis = [
-  "0️⃣","1️⃣","2️⃣","3️⃣","4️⃣",
-  "5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"
+  "1️⃣","2️⃣","3️⃣","4️⃣","5️⃣",
+  "6️⃣","7️⃣","8️⃣","9️⃣","🔟"
 ];
 
-// CATEGORY IMAGES
-const menuImages = {
+/*
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+ CATEGORY IMAGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+*/
+
+const categoryImages = {
+
   DOWNLOAD: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.31.20.jpeg?raw=true",
   SEARCH: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.36.00.jpeg?raw=true",
   GROUP: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.34.57.jpeg?raw=true",
   OWNER: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.32.49.jpeg?raw=true",
   AI: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.35.23.jpeg?raw=true",
+  MOVIE: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.34.11.jpeg?raw=true"
 };
 
-const defaultImage =
-  "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/ChatGPT%20Image%20May%2010,%202026,%2007_16_34%20PM.png?raw=true";
+const mainImage =
+  "https://raw.githubusercontent.com/sithija-bot/SITHIJA_MD/main/images/menu.jpg";
 
-// MAIN MENU
-cmd(
-  {
-    pattern: "menu",
-    react: "🏠",
-    alias: ["allmenu", "panel", "commands"],
-    desc: "Show all command categories",
-    category: "main",
-    filename: __filename,
-  },
-  async (test, m, msg, { from, sender, pushname, reply }) => {
+cmd({
+  pattern: "menu",
+  react: "🌸",
+  desc: "Interactive menu",
+  category: "main",
+  filename: __filename
+}, async (conn, m, msg, { from, sender }) => {
 
-    try {
+  const commandMap = {};
 
-      await test.sendMessage(from, {
-        react: {
-          text: "🏠",
-          key: m.key,
-        },
-      });
+  for (const command of commands) {
 
-      const commandMap = {};
+    if (command.dontAddCommandList) continue;
 
-      for (const command of commands) {
+    const category = (command.category || "misc").toUpperCase();
 
-        if (command.dontAddCommandList) continue;
-        if (!command.category) continue;
-    
+    // REMOVE MISC CATEGORY
+    if (category === "MISC") continue;
 
-        const category = command.category.toUpperCase();
+    if (!commandMap[category]) {
+      commandMap[category] = [];
+    }
 
-        if (!commandMap[category]) {
-          commandMap[category] = [];
-        }
+    commandMap[category].push(command);
+  }
 
-        commandMap[category].push(command);
-      }
+  const categories = Object.keys(commandMap);
 
-      const categories = Object.keys(commandMap);
+  // TOTAL COMMANDS
+  const totalCommands = commands.filter(
+    cmd =>
+      !cmd.dontAddCommandList &&
+      (cmd.category || "misc").toUpperCase() !== "MISC"
+  ).length;
 
-      let menuText = `
-╭━━〔 ⚡ SITHIJA MD ⚡ 〕━━⬣
-┃ 👤 ${pushname}
-┃ 🚀 ONLINE MODE
-┃ 📦 ${commands.length} COMMANDS
+  // BOT PING
+  const ping = Date.now() - (m.messageTimestamp * 1000);
+
+  let menu = `
+╭━━━〔 *SITHIJA MD* 〕━━━⬣
+┃ ✦ User : @${sender.split("@")[0]}
+┃ ✦ Prefix : .
+┃ ✦ Mode : Public
+┃ ✦ Bot Ping : ${ping} ms
+┃ ✦ Total Cmds : ${totalCommands}
 ╰━━━━━━━━━━━━━━⬣
 
-╭━━〔 COMMAND LIST 〕━━⬣
+╭━━〔 *MENU LIST* 〕━━⬣
 `;
 
-      categories.forEach((cat, i) => {
+  categories.forEach((cat, i) => {
+    menu += `┃ ${numberEmojis[i] || "🔹"} ${cat}\n`;
+  });
 
-        const emoji =
-          (i + 1)
-            .toString()
-            .split("")
-            .map((n) => numberEmojis[n])
-            .join("");
+  menu += `╰━━━━━━━━━━━━━━⬣
 
-        menuText += `┃ ${emoji} ${cat}\n┃\n`;
-      });
+🌸 Reply with category number`;
 
-      menuText += `╰━━━━━━━━━━━━━━⬣`;
+  await conn.sendMessage(from, {
+    image: { url: mainImage },
+    caption: menu,
+    mentions: [sender]
+  }, { quoted: m });
 
-      await test.sendMessage(
-        from,
-        {
-          image: {
-            url: menuImages["MAIN"] || defaultImage,
-          },
-          caption: menuText,
-          contextInfo: {
-            forwardingScore: 999,
-            isForwarded: true,
-            externalAdReply: {
-              title: "SITHIJA MD",
-              body: "MULTI DEVICE WHATSAPP BOT",
-              mediaType: 1,
-              renderLargerThumbnail: true,
-              showAdAttribution: false,
-            },
-          },
-        },
-        {
-          quoted: m,
-        }
-      );
+  pendingMenu[sender] = {
+    step: "category",
+    commandMap,
+    categories
+  };
+});
 
-      pendingMenu[sender] = {
-        step: "category",
-        commandMap,
-        categories,
-      };
+cmd({
+  filter: (text, { sender }) =>
+    pendingMenu[sender] &&
+    pendingMenu[sender].step === "category" &&
+    /^[1-9][0-9]*$/.test(text.trim())
 
-    } catch (e) {
-      console.log(e);
-      reply(`❌ Error : ${e}`);
-    }
+}, async (conn, m, msg, { from, body, sender, reply }) => {
+
+  const data = pendingMenu[sender];
+
+  if (!data) return;
+
+  const index = parseInt(body.trim()) - 1;
+
+  if (index < 0 || index >= data.categories.length) {
+    return reply("❌ Invalid Number");
   }
-);
 
-// CATEGORY MENU
-cmd(
-  {
-    filter: (text, { sender }) =>
-      pendingMenu[sender] &&
-      pendingMenu[sender].step === "category" &&
-      /^[1-9][0-9]*$/.test(text.trim()),
-  },
-  async (test, m, msg, { from, body, sender, reply }) => {
+  const selectedCategory = data.categories[index];
+  const cmds = data.commandMap[selectedCategory];
 
-    try {
+  /*
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATEGORY IMAGE SELECT
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+  */
 
-      await test.sendMessage(from, {
-        react: {
-          text: "⚡",
-          key: m.key,
-        },
-      });
+  const categoryImage = categoryImages[selectedCategory];
 
-      const { commandMap, categories } = pendingMenu[sender];
-
-      const index = parseInt(body.trim()) - 1;
-
-      if (index < 0 || index >= categories.length) {
-        return reply("❌ INVALID NUMBER");
-      }
-
-      const selectedCategory = categories[index];
-
-      const cmdsInCategory = commandMap[selectedCategory];
-
-      let cmdText = `
-╭━━〔 📂 ${selectedCategory} MENU 〕━━⬣
+  let text = `
+╭━━━〔 *${selectedCategory} MENU* 〕━━━⬣
 
 `;
 
-      cmdsInCategory.forEach((c, i) => {
+  cmds.forEach((cmdData, i) => {
 
-        const patterns = [
-          c.pattern,
-          ...(c.alias || []),
-        ]
-          .filter(Boolean)
-          .map((p) => `.${p}`);
+    const patterns = [
+      cmdData.pattern,
+      ...(cmdData.alias || [])
+    ]
+      .filter(Boolean)
+      .map(p => `.${p}`);
 
-        cmdText += `┃ ${numberEmojis[i + 1] || "🔹"} ${patterns.join(" , ")}\n`;
-        cmdText += `┃ 📄 ${c.desc || "NO DESCRIPTION"}\n`;
-        cmdText += `┣━━━━━━━━━━━━⬣\n`;
-      });
+    text += `┃ ${numberEmojis[i] || "🔹"} ${patterns.join(", ")}\n`;
+    text += `┃ ✦ ${cmdData.desc || "No Description"}\n`;
+    text += `┃\n`;
+  });
 
-      cmdText += `
-╰━━〔 ${cmdsInCategory.length} COMMANDS 〕━━⬣
-`;
+  text += `╰━━━━━━━━━━━━━━⬣
 
-      await test.sendMessage(
-        from,
-        {
-          image: {
-            url: menuImages[selectedCategory] || defaultImage,
-          },
-          caption: cmdText,
-          contextInfo: {
-            forwardingScore: 999,
-            isForwarded: true,
-            externalAdReply: {
-              title: `${selectedCategory} MENU`,
-              body: "SITHIJA MD WHATSAPP BOT",
-              mediaType: 1,
-              renderLargerThumbnail: true,
-              showAdAttribution: false,
-            },
-          },
-        },
-        {
-          quoted: m,
-        }
-      );
+🌸 Total Commands : ${cmds.length}
+💖 Powered By SITHIJA MD`;
 
-      delete pendingMenu[sender];
+  await conn.sendMessage(from, {
+    image: { url: categoryImage },
+    caption: text
+  }, { quoted: m });
 
-    } catch (e) {
-      console.log(e);
-      reply(`❌ Error : ${e}`);
-    }
-  }
-);
+  delete pendingMenu[sender];
+});

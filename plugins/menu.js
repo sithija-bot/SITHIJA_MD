@@ -82,7 +82,8 @@ cmd(
             .map((n) => numberEmojis[n])
             .join("");
 
-        menuText += `┃ ${emoji} ${cat}\n┃\n`;
+        // GAP REMOVE
+        menuText += `┃ ${emoji} ${cat}\n`;
       });
 
       menuText += `╰━━━━━━━━━━━━━━⬣`;
@@ -158,7 +159,6 @@ cmd(
 
       let cmdText = `
 ╭━━〔 📂 ${selectedCategory} MENU 〕━━⬣
-
 `;
 
       cmdsInCategory.forEach((c, i) => {
@@ -170,12 +170,14 @@ cmd(
           .filter(Boolean)
           .map((p) => `.${p}`);
 
-        cmdText += `┃ ${numberEmojis[i + 1] || "🔹"} ${patterns.join(" , ")}\n`;
-        cmdText += `┃ 📄 ${c.desc || "NO DESCRIPTION"}\n`;
-        cmdText += `┣━━━━━━━━━━━━⬣\n`;
+        cmdText += `
+┃ ${numberEmojis[i + 1] || "🔹"} ${patterns.join(" , ")}
+┃ 📄 ${c.desc || "NO DESCRIPTION"}
+┣━━━━━━━━━━━━⬣`;
       });
 
       cmdText += `
+
 ╰━━〔 ${cmdsInCategory.length} COMMANDS 〕━━⬣
 `;
 
@@ -193,7 +195,6 @@ cmd(
               title: `${selectedCategory} MENU`,
               body: "SITHIJA MD WHATSAPP BOT",
               thumbnailUrl: menuImages[selectedCategory] || defaultImage,
-              sourceUrl: "https://github.com/",
               mediaType: 1,
               renderLargerThumbnail: true,
               showAdAttribution: false,

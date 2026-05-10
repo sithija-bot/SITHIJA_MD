@@ -13,18 +13,19 @@ const headerImage =
 cmd(
   {
     pattern: "menu",
-    react: "📋",
+    react: "🏠",
     alias: ["allmenu", "panel", "commands"],
     desc: "Show all command categories",
     category: "main",
     filename: __filename,
   },
   async (test, m, msg, { from, sender, pushname, reply }) => {
+
     try {
 
       await test.sendMessage(from, {
         react: {
-          text: "📋",
+          text: "🏠",
           key: m.key,
         },
       });
@@ -34,8 +35,9 @@ cmd(
       for (const command of commands) {
 
         if (command.dontAddCommandList) continue;
+        if (!command.category) continue;
 
-        const category = (command.category || "misc").toUpperCase();
+        const category = command.category.toUpperCase();
 
         if (!commandMap[category]) {
           commandMap[category] = [];
@@ -47,15 +49,15 @@ cmd(
       const categories = Object.keys(commandMap);
 
       let menuText = `
-╭━━━〔 *SITHIJA MD* 〕━━━⬣
-┃ 👤 *USER* : ${pushname}
-┃ ⚡ *PREFIX* : .
-┃ 📦 *COMMANDS* : ${commands.length}
-┃ 🚀 *STATUS* : ONLINE
-┃ 💻 *VERSION* : 3.0.0
-╰━━━━━━━━━━━━━━━━⬣
+╭──────────────────◆
+│  ⚡ *SITHIJA MD*
+│  👤 ${pushname}
+│  🚀 ONLINE MODE
+│  📦 ${commands.length} COMMANDS
+│  💻 VERSION 1.0.0
+╰──────────────────◆
 
-╭━━〔 *MAIN MENU* 〕━━⬣
+╭━━〔 *COMMAND LIST* 〕━━◆
 `;
 
       categories.forEach((cat, i) => {
@@ -67,14 +69,17 @@ cmd(
             .map((n) => numberEmojis[n])
             .join("");
 
-        menuText += `┃ ${emoji}  *${cat}* (${commandMap[cat].length})\n`;
+        menuText += `┃ ${emoji} │ ${cat}\n`;
+        menuText += `┃     ╰➤ ${commandMap[cat].length} COMMANDS\n`;
       });
 
-      menuText += `╰━━━━━━━━━━━━━━━━⬣
+      menuText += `╰━━━━━━━━━━━━━━━━◆
 
-> 💜 THE ULTIMATE WHATSAPP BOT
-> ⚡ FAST • SIMPLE • POWERFUL
-> 👑 POWERED BY SITHIJA MD
+╭──────────────────◆
+│ 💜 THE ULTIMATE BOT
+│ ⚡ FAST • SIMPLE • POWERFUL
+│ 👑 POWERED BY SITHIJA MD
+╰──────────────────◆
 `;
 
       await test.sendMessage(
@@ -89,7 +94,7 @@ cmd(
             isForwarded: true,
             externalAdReply: {
               title: "SITHIJA MD",
-              body: "THE ULTIMATE WHATSAPP BOT",
+              body: "MULTI DEVICE WHATSAPP BOT",
               thumbnailUrl: headerImage,
               sourceUrl: "https://github.com/",
               mediaType: 1,
@@ -129,7 +134,7 @@ cmd(
 
       await test.sendMessage(from, {
         react: {
-          text: "✅",
+          text: "⚡",
           key: m.key,
         },
       });
@@ -139,7 +144,7 @@ cmd(
       const index = parseInt(body.trim()) - 1;
 
       if (index < 0 || index >= categories.length) {
-        return reply("❌ Invalid Number");
+        return reply("❌ INVALID NUMBER");
       }
 
       const selectedCategory = categories[index];
@@ -147,7 +152,9 @@ cmd(
       const cmdsInCategory = commandMap[selectedCategory];
 
       let cmdText = `
-╭━━〔 *${selectedCategory} MENU* 〕━━⬣
+╭──────────────────◆
+│ 📂 ${selectedCategory} MENU
+╰──────────────────◆
 
 `;
 
@@ -160,15 +167,17 @@ cmd(
           .filter(Boolean)
           .map((p) => `.${p}`);
 
-        cmdText += `┃ ${numberEmojis[i + 1] || "🔹"}  ${patterns.join(" , ")}\n`;
-        cmdText += `┃ 📄 ${c.desc || "No Description"}\n`;
-        cmdText += `┃\n`;
+        cmdText += `╭━〔 ${numberEmojis[i + 1] || "🔹"} 〕━◆\n`;
+        cmdText += `┃ ⚡ ${patterns.join(" , ")}\n`;
+        cmdText += `┃ 📄 ${c.desc || "NO DESCRIPTION"}\n`;
+        cmdText += `╰━━━━━━━━━━◆\n\n`;
       });
 
-      cmdText += `╰━━━━━━━━━━━━━━━━⬣
-
-✨ *TOTAL COMMANDS* : ${cmdsInCategory.length}
-💜 *SITHIJA MD*
+      cmdText += `
+╭──────────────────◆
+│ ✨ TOTAL : ${cmdsInCategory.length}
+│ 💜 SITHIJA MD
+╰──────────────────◆
 `;
 
       await test.sendMessage(

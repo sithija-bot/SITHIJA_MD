@@ -36,7 +36,7 @@ cmd(
 
         if (command.dontAddCommandList) continue;
         if (!command.category) continue;
-
+        if (command.category.toLowerCase() === "misc") continue;
         const category = command.category.toUpperCase();
 
         if (!commandMap[category]) {

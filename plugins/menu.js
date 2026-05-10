@@ -101,7 +101,6 @@ cmd(
               title: "SITHIJA MD",
               body: "MULTI DEVICE WHATSAPP BOT",
               thumbnailUrl: menuImages["MAIN"] || defaultImage,
-              sourceUrl: "https://github.com/",
               mediaType: 1,
               renderLargerThumbnail: true,
               showAdAttribution: false,

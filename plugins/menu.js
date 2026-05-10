@@ -5,9 +5,7 @@ const path = require("path");
 const pendingMenu = {};
 const numberEmojis = ["0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"];
 
-const headerImage = "https://github.com/DANUWA-MD/DANUWA-MD/blob/main/images/DANUWA-MD.png?raw=true";
-
-cmd({
+const headerImage = "
   pattern: "menu",
   react: "🫂",
   desc: "Show command categories",

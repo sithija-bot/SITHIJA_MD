@@ -9,7 +9,6 @@ const numberEmojis = [
 
 // CATEGORY IMAGES
 const menuImages = {
-  MAIN: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.33.16.jpeg?raw=true",
   DOWNLOAD: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.31.20.jpeg?raw=true",
   GROUP: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.34.57.jpeg?raw=true",
   OWNER: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/WhatsApp%20Image%202026-05-10%20at%2018.32.49.jpeg?raw=true",

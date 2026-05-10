@@ -187,8 +187,6 @@ cmd(
             externalAdReply: {
               title: `${selectedCategory} MENU`,
               body: "SITHIJA MD WHATSAPP BOT",
-              thumbnailUrl: menuImages[selectedCategory] || defaultImage,
-              sourceUrl: "https://github.com/",
               mediaType: 1,
               renderLargerThumbnail: true,
               showAdAttribution: false,

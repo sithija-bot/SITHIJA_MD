@@ -72,7 +72,6 @@ cmd({
 ┃ 🔥 Mode : Public 
 ┃ 🌐 Platform : Railway 
 ┃ 💻 Version : v1.0.0 
-┃ 📜 Commands : ${totalCommands}
 ╰━━━━━━━━━━━━━━━━━━⬣
 
 

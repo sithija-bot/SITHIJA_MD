@@ -72,13 +72,13 @@ cmd({
 │ 🚀 ᴠᴇʀsɪᴏɴ : 1.0
 │ 🟢 sᴛᴀᴛᴜs : Online
 │ 🤵 ᴏᴡɴᴇʀ : MR.Sithija Anuhas 💜
-│ 📡 ᴘɪɴɢ : ${ping}ms 📡
+│ 📡 ᴘɪɴɢ : ${ping}ms 
 │ ⌨️ ᴘʀᴇғɪx : [ . ]
 │ 🌐 ᴘʟᴀᴛғᴏʀᴍ : Railway 
 ╰────────────⊷
 
 
-╭━━〔 *MENU LIST* 〕━━⬣
+╭━━〔 *⚡MENU LIST⚡* 〕━━⬣
 `;
 
   categories.forEach((cat, i) => {
@@ -151,8 +151,8 @@ cmd({
 
   text += `╰━━━━━━━━━━━━━━⬣
 
-🌸 Total Commands : ${cmds.length}
-💖 Powered By SITHIJA ANUHAS`;
+♻️ Total Commands : ${cmds.length}
+♻️ Powered By SITHIJA ANUHAS`;
 
   // SEND CATEGORY WITH SAME IMAGE
 

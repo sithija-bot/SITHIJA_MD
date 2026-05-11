@@ -91,7 +91,7 @@ cmd({
 
 ⚡ Reply with category number  
 
-🤖 Fast ⚡ • Secure 🔒 • Powerful 💪 • Always Active ♾️`;
+ Fast ⚡ • Secure 🔒 • Powerful 💪 • Always Active ♾️`;
 
   await conn.sendMessage(from, {
     image: { url: mainImage },

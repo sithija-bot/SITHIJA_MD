@@ -12,6 +12,8 @@ ALIVE_MSG: process.env.ALIVE_MSG || "*✨ Hello, SITHIJA MD is now alive and run
 BOT_OWNER: '94785936039',  // Replace with the owner's phone number
 AUTO_STATUS_SEEN: 'true',
 AUTO_STATUS_REACT: 'true',
+ANTI_DELETE: true,
+MOVIE_FOOTER_TEXT: "𝓜𝓡.Sithija Anuhas",
 
 
 

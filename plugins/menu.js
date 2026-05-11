@@ -67,18 +67,15 @@ cmd({
 
   let menu = `
 ╭━━━〔 *🤖 SITHIJA MD 🤖* 〕━━━⬣
-┃ ⚡ Status : Online 🟢
-┃ 👑 Owner : Sithija 👑
-┃ 🧠 Bot Name : SITHIJA MD 🤖
+┃ ⚡ Status : Online 
+┃ 👑 Owner : Sithija Anuhas
 ┃ 📶 Ping : ${ping}ms 📡
-┃ 🔥 Mode : Public 🌍
-┃ 🌐 Platform : Railway 🚂
-┃ 💻 Version : v1.0.0 🛠️
-┃ 📂 Categories : ${categories.length}
+┃ 🔥 Mode : Public 
+┃ 🌐 Platform : Railway 
+┃ 💻 Version : v1.0.0 
 ┃ 📜 Commands : ${totalCommands}
 ╰━━━━━━━━━━━━━━━━━━⬣
 
-🤖 Fast ⚡ • Secure 🔒 • Powerful 💪 • Always Active ♾️
 
 ╭━━〔 *MENU LIST* 〕━━⬣
 `;
@@ -92,7 +89,9 @@ cmd({
 
   menu += `╰━━━━━━━━━━━━━━⬣
 
-🌸 Reply with category number`;
+🌸 Reply with category number  
+
+🤖 Fast ⚡ • Secure 🔒 • Powerful 💪 • Always Active ♾️`;
 
   await conn.sendMessage(from, {
     image: { url: mainImage },
@@ -153,7 +152,7 @@ cmd({
   text += `╰━━━━━━━━━━━━━━⬣
 
 🌸 Total Commands : ${cmds.length}
-💖 Powered By SITHIJA MD`;
+💖 Powered By SITHIJA ANUHAS`;
 
   // SEND CATEGORY WITH SAME IMAGE
 

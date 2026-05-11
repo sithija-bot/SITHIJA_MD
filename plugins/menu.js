@@ -8,7 +8,7 @@ const numberEmojis = [
 ];
 
 const mainImage =
-  "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/ChatGPT%20Image%20May%2010,%202026,%2007_16_34%20PM.png?raw=true";
+  "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/ChatGPT%20Image%20May%2011,%202026,%2007_18_16%20PM.png?raw=true";
 
 cmd({
   pattern: "menu",
@@ -49,13 +49,16 @@ cmd({
   const ping = Date.now() - (m.messageTimestamp * 1000);
 
   let menu = `
-╭━━━〔 *SITHIJA MD* 〕━━━⬣
-┃ ✦ User : @${sender.split("@")[0]}
-┃ ✦ Prefix : .
-┃ ✦ Mode : Public
-┃ ✦ Bot Ping : ${ping} ms
-┃ ✦ Total Cmds : ${totalCommands}
-╰━━━━━━━━━━━━━━⬣
+╭━━━〔 SITHIJA MD 〕━━━⬣
+┃ ⚡ Status : Online
+┃ 👑 Owner : Sithija
+┃ 🧠 Bot Name : SITHIJA MD
+┃ 📶 Ping : 24ms
+┃ 🔥 Mode : Public
+┃ 🌐 Platform : Railway
+┃ 💻 Version : v1.0.0
+╰━━━━━━━━━━━━━━━━━━⬣ 
+🤖 Fast ⚡ • Secure 🔒 • Powerful 💪 • Always Active ♾️
 
 ╭━━〔 *MENU LIST* 〕━━⬣
 `;

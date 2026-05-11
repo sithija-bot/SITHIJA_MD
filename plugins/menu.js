@@ -7,6 +7,23 @@ const numberEmojis = [
   "6️⃣","7️⃣","8️⃣","9️⃣","🔟"
 ];
 
+// CATEGORY EMOJIS
+const categoryEmojis = {
+  MAIN: "🏠",
+  DOWNLOAD: "📥",
+  SEARCH: "🔍",
+  GROUP: "👥",
+  ANIME: "🌸",
+  MOVIE: "🎬",
+  AI: "🤖",
+  FUN: "😂",
+  OWNER: "👑",
+  TOOLS: "🛠️",
+  CONVERT: "♻️",
+  NSFW: "🔞",
+  OTHER: "✨"
+};
+
 const mainImage =
   "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/ChatGPT%20Image%20May%2011,%202026,%2007_18_16%20PM.png?raw=true";
 
@@ -49,22 +66,28 @@ cmd({
   const ping = Date.now() - (m.messageTimestamp * 1000);
 
   let menu = `
-╭━━━〔 SITHIJA MD 〕━━━⬣
-┃ ⚡ Status : Online
-┃ 👑 Owner : Sithija
-┃ 🧠 Bot Name : SITHIJA MD
-┃ 📶 Ping : 24ms
-┃ 🔥 Mode : Public
-┃ 🌐 Platform : Railway
-┃ 💻 Version : v1.0.0
-╰━━━━━━━━━━━━━━━━━━⬣ 
+╭━━━〔 *🤖 SITHIJA MD 🤖* 〕━━━⬣
+┃ ⚡ Status : Online 🟢
+┃ 👑 Owner : Sithija 👑
+┃ 🧠 Bot Name : SITHIJA MD 🤖
+┃ 📶 Ping : ${ping}ms 📡
+┃ 🔥 Mode : Public 🌍
+┃ 🌐 Platform : Railway 🚂
+┃ 💻 Version : v1.0.0 🛠️
+┃ 📂 Categories : ${categories.length}
+┃ 📜 Commands : ${totalCommands}
+╰━━━━━━━━━━━━━━━━━━⬣
+
 🤖 Fast ⚡ • Secure 🔒 • Powerful 💪 • Always Active ♾️
 
 ╭━━〔 *MENU LIST* 〕━━⬣
 `;
 
   categories.forEach((cat, i) => {
-    menu += `┃ ${numberEmojis[i] || "🔹"} ${cat}\n`;
+
+    const emoji = categoryEmojis[cat] || "✨";
+
+    menu += `┃ ${numberEmojis[i] || "🔹"} ${emoji} ${cat}\n`;
   });
 
   menu += `╰━━━━━━━━━━━━━━⬣
@@ -105,8 +128,11 @@ cmd({
   const selectedCategory = data.categories[index];
   const cmds = data.commandMap[selectedCategory];
 
+  const categoryEmoji =
+    categoryEmojis[selectedCategory] || "✨";
+
   let text = `
-╭━━━〔 *${selectedCategory} MENU* 〕━━━⬣
+╭━━━〔 *${categoryEmoji} ${selectedCategory} MENU* 〕━━━⬣
 
 `;
 
@@ -119,7 +145,7 @@ cmd({
       .filter(Boolean)
       .map(p => `.${p}`);
 
-    text += `┃ ${numberEmojis[i] || "🔹"} ${patterns.join(", ")}\n`;
+    text += `┃ ${numberEmojis[i] || "🔹"} ⚡ ${patterns.join(", ")}\n`;
     text += `┃ ✦ ${cmdData.desc || "No Description"}\n`;
     text += `┃\n`;
   });
@@ -129,11 +155,11 @@ cmd({
 🌸 Total Commands : ${cmds.length}
 💖 Powered By SITHIJA MD`;
 
-  // CATEGORY IMAGE REMOVE
-  // ONLY TEXT MESSAGE SEND
+  // SEND CATEGORY WITH SAME IMAGE
 
   await conn.sendMessage(from, {
-    text: text
+    image: { url: mainImage },
+    caption: text
   }, { quoted: m });
 
   delete pendingMenu[sender];

@@ -18,7 +18,7 @@ const categoryEmojis = {
   AI: "✨",
   FUN: "😂",
   OWNER: "👑",
-  TOOLS: "🛠️",
+  OTHERS: "🛠️",
   CONVERT: "♻️",
   NSFW: "🔞"
 };
@@ -28,7 +28,7 @@ const mainImage =
 
 cmd({
   pattern: "menu",
-  react: "🌸",
+  react: "💻",
   desc: "Interactive menu",
   category: "main",
   filename: __filename

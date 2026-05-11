@@ -15,13 +15,12 @@ const categoryEmojis = {
   GROUP: "👥",
   ANIME: "🌸",
   MOVIE: "🎬",
-  AI: "🤖",
+  AI: "✨",
   FUN: "😂",
   OWNER: "👑",
   TOOLS: "🛠️",
   CONVERT: "♻️",
-  NSFW: "🔞",
-  OTHER: "✨"
+  NSFW: "🔞"
 };
 
 const mainImage =

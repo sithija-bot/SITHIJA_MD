@@ -18,7 +18,7 @@ const categoryEmojis = {
   AI: "✨",
   FUN: "😂",
   OWNER: "👑",
-  OTHERS: "🛠️",
+  LOGO: "🛠️",
   CONVERT: "♻️",
   NSFW: "🔞"
 };
@@ -28,7 +28,7 @@ const mainImage =
 
 cmd({
   pattern: "menu",
-  react: "💻",
+  react: "⚡",
   desc: "Interactive menu",
   category: "main",
   filename: __filename
@@ -65,14 +65,16 @@ cmd({
   const ping = Date.now() - (m.messageTimestamp * 1000);
 
   let menu = `
-╭━━━〔 *🤖 SITHIJA MD 🤖* 〕━━━⬣
-┃ ⚡ Status : Online 
-┃ 👑 Owner : Sithija Anuhas
+
+🚀 sʏsᴛᴇᴍ ᴏɴʟɪɴᴇ • ғᴜʟʟʏ ᴀᴄᴛɪᴠᴇ
+
+╭─〔 ⚡ s ʏ s ᴛ ᴇ ᴍ ⚡ 〕─⊷
+│ 🚀 ᴠᴇʀsɪᴏɴ : 1.0
+┃ ⚡ Status : Online
+│ 🤵 ᴏᴡɴᴇʀ : MR.Sithija Anuhas 💜
 ┃ 📶 Ping : ${ping}ms 📡
-┃ 🔥 Mode : Public 
-┃ 🌐 Platform : Railway 
-┃ 💻 Version : v1.0.0 
-╰━━━━━━━━━━━━━━━━━━⬣
+│ ⌨️ ᴘʀᴇғɪx : [ . ]
+╰────────────⊷
 
 
 ╭━━〔 *MENU LIST* 〕━━⬣
@@ -87,7 +89,7 @@ cmd({
 
   menu += `╰━━━━━━━━━━━━━━⬣
 
-🌸 Reply with category number  
+⚡ Reply with category number  
 
 🤖 Fast ⚡ • Secure 🔒 • Powerful 💪 • Always Active ♾️`;
 

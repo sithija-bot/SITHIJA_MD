@@ -6,8 +6,7 @@ global.settings = {
     antiDelete: false
 };
 
-// ================= SETTINGS MENU =================
-
+// SETTINGS MENU
 cmd({
     pattern: "setting",
     react: "⚙️",
@@ -16,11 +15,10 @@ cmd({
     filename: __filename
 },
 async (conn, mek, m, {
-    from,
     reply
 }) => {
 
-const text = `
+const txt = `
 ╭━━━〔 ⚙️ SITHIJA MD SETTINGS ⚙️ 〕━━━⬣
 
 1️⃣ Auto React 😍
@@ -37,26 +35,23 @@ const text = `
 Reply Number To Toggle
 `;
 
-await reply(text);
+return reply(txt);
 
 });
 
-// ================= MAIN MESSAGE EVENT =================
-
+// REPLY HANDLER
 cmd({
-    on: "body"
+    filter: (body) =>
+    ["1","2","3"].includes(body)
 },
 async (conn, mek, m, {
     body,
-    from,
-    reply
+    reply,
+    from
 }) => {
 
-const text = body ? body.trim() : "";
-
-// ================= TOGGLE SETTINGS =================
-
-if(text === "1"){
+// AUTO REACT
+if(body === "1"){
 
 global.settings.autoReact =
 !global.settings.autoReact;
@@ -71,7 +66,8 @@ global.settings.autoReact
 
 }
 
-if(text === "2"){
+// AUTO SEEN
+if(body === "2"){
 
 global.settings.autoSeen =
 !global.settings.autoSeen;
@@ -86,7 +82,8 @@ global.settings.autoSeen
 
 }
 
-if(text === "3"){
+// ANTI DELETE
+if(body === "3"){
 
 global.settings.antiDelete =
 !global.settings.antiDelete;
@@ -101,16 +98,23 @@ global.settings.antiDelete
 
 }
 
-// ================= AUTO REACT =================
+});
+
+// AUTO REACT + AUTO SEEN
+module.exports.onMessage = async (conn, mek) => {
+
+const from = mek.key.remoteJid;
+
+if(global.settings.autoSeen){
+
+await conn.readMessages([mek.key]);
+
+}
 
 if(global.settings.autoReact){
 
 const emojis = [
-    "😍",
-    "🔥",
-    "⚡",
-    "😂",
-    "🥶"
+"😍","🔥","⚡","😂","🥶"
 ];
 
 const emoji =
@@ -125,35 +129,26 @@ key:mek.key
 
 }
 
-// ================= AUTO SEEN =================
+};
 
-if(global.settings.autoSeen){
-
-await conn.readMessages([mek.key]);
-
-}
-
-});
-
-// ================= ANTI DELETE =================
-
-cmd({
-    on: "delete"
-},
-async (conn, mek, m, {
-    from
-}) => {
+// ANTI DELETE
+module.exports.onDelete = async (conn, updates) => {
 
 if(!global.settings.antiDelete) return;
 
-try {
+for(const update of updates){
 
-await conn.sendMessage(from,{
+if(update.update?.message === null){
+
+await conn.sendMessage(
+update.key.remoteJid,
+{
 text:"🚫 Deleted Message Detected!"
-});
+}
+);
 
-} catch(e){
-console.log(e);
 }
 
-});
+}
+
+};

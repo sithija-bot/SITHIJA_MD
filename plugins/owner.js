@@ -4,7 +4,7 @@ cmd(
   {
     pattern: 'owner',
     desc: 'Show bot owner information',
-    category: 'main',
+    category: 'owner',
     react: '👑',
     filename: __filename,
   },

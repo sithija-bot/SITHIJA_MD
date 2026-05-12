@@ -105,7 +105,7 @@ async function connectToWA() {
 
       const up = `SITHIJA-MD connected ✅\n\nPREFIX: ${prefix}`;
       await test.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/ChatGPT%20Image%20May%2011,%202026,%2007_18_16%20PM.png?raw=true` },
+        image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true` },
         caption: up
       });
 

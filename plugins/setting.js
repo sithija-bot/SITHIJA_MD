@@ -1,6 +1,5 @@
 const { cmd } = require("../command");
 
-// SETTINGS SAVE
 global.settings = {
     autoReact: false,
     autoSeen: false,
@@ -18,47 +17,46 @@ cmd({
 },
 async (conn, mek, m, {
     from,
-    sender
+    reply
 }) => {
 
-const txt = `
-╭━━━〔 ⚙️ *SITHIJA MD SETTINGS* ⚙️ 〕━━━⬣
+const text = `
+╭━━━〔 ⚙️ SITHIJA MD SETTINGS ⚙️ 〕━━━⬣
 
-┃ 1️⃣ ➤ Auto React 😍
-┃ ➤ ${global.settings.autoReact ? "🟢 ON" : "🔴 OFF"}
+1️⃣ Auto React 😍
+➤ ${global.settings.autoReact ? "🟢 ON" : "🔴 OFF"}
 
-┃ 2️⃣ ➤ Auto Seen 👀
-┃ ➤ ${global.settings.autoSeen ? "🟢 ON" : "🔴 OFF"}
+2️⃣ Auto Seen 👀
+➤ ${global.settings.autoSeen ? "🟢 ON" : "🔴 OFF"}
 
-┃ 3️⃣ ➤ Anti Delete 🚫
-┃ ➤ ${global.settings.antiDelete ? "🟢 ON" : "🔴 OFF"}
+3️⃣ Anti Delete 🚫
+➤ ${global.settings.antiDelete ? "🟢 ON" : "🔴 OFF"}
 
 ╰━━━━━━━━━━━━━━━━━━⬣
 
-💡 Reply Only Number
+Reply Number To Toggle
 `;
 
-await conn.sendMessage(from,{
-    image:{
-        url:"https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true"
-    },
-    caption: txt,
-    mentions:[sender]
-},{quoted:mek});
+await reply(text);
 
 });
 
-// ================= TOGGLE SETTINGS =================
+// ================= MAIN MESSAGE EVENT =================
 
 cmd({
     on: "body"
 },
 async (conn, mek, m, {
     body,
+    from,
     reply
 }) => {
 
-if(body === "1"){
+const text = body ? body.trim() : "";
+
+// ================= TOGGLE SETTINGS =================
+
+if(text === "1"){
 
 global.settings.autoReact =
 !global.settings.autoReact;
@@ -73,7 +71,7 @@ global.settings.autoReact
 
 }
 
-if(body === "2"){
+if(text === "2"){
 
 global.settings.autoSeen =
 !global.settings.autoSeen;
@@ -88,7 +86,7 @@ global.settings.autoSeen
 
 }
 
-if(body === "3"){
+if(text === "3"){
 
 global.settings.antiDelete =
 !global.settings.antiDelete;
@@ -103,46 +101,37 @@ global.settings.antiDelete
 
 }
 
-});
-
 // ================= AUTO REACT =================
 
-cmd({
-    on: "body"
-},
-async (conn, mek, m) => {
-
-if(!global.settings.autoReact) return;
+if(global.settings.autoReact){
 
 const emojis = [
-"😍","🔥","⚡","💀","🥶","😎","😂"
+    "😍",
+    "🔥",
+    "⚡",
+    "😂",
+    "🥶"
 ];
 
 const emoji =
 emojis[Math.floor(Math.random()*emojis.length)];
 
-await conn.sendMessage(
-mek.key.remoteJid,
-{
+await conn.sendMessage(from,{
 react:{
 text:emoji,
 key:mek.key
 }
-}
-);
-
 });
+
+}
 
 // ================= AUTO SEEN =================
 
-cmd({
-    on: "body"
-},
-async (conn, mek, m) => {
-
-if(!global.settings.autoSeen) return;
+if(global.settings.autoSeen){
 
 await conn.readMessages([mek.key]);
+
+}
 
 });
 
@@ -157,8 +146,14 @@ async (conn, mek, m, {
 
 if(!global.settings.antiDelete) return;
 
+try {
+
 await conn.sendMessage(from,{
-text:"🚫 Message Deleted!"
+text:"🚫 Deleted Message Detected!"
 });
+
+} catch(e){
+console.log(e);
+}
 
 });

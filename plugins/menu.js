@@ -24,7 +24,7 @@ const categoryEmojis = {
 };
 
 const mainImage =
-  "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/ChatGPT%20Image%20May%2011,%202026,%2007_18_16%20PM.png?raw=true";
+  "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true";
 
 cmd({
   pattern: "menu",

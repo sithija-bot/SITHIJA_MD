@@ -1,6 +1,7 @@
 const { cmd } = require("../command");
 
-let settings = {
+// SETTINGS SAVE
+global.settings = {
     autoReact: false,
     autoSeen: false,
     antiDelete: false
@@ -11,7 +12,7 @@ let settings = {
 cmd({
     pattern: "setting",
     react: "⚙️",
-    desc: "Bot Settings Panel",
+    desc: "Bot Settings",
     category: "main",
     filename: __filename
 },
@@ -24,26 +25,26 @@ const txt = `
 ╭━━━〔 ⚙️ *SITHIJA MD SETTINGS* ⚙️ 〕━━━⬣
 
 ┃ 1️⃣ ➤ Auto React 😍
-┃ ➤ ${settings.autoReact ? "🟢 ON" : "🔴 OFF"}
+┃ ➤ ${global.settings.autoReact ? "🟢 ON" : "🔴 OFF"}
 
 ┃ 2️⃣ ➤ Auto Seen 👀
-┃ ➤ ${settings.autoSeen ? "🟢 ON" : "🔴 OFF"}
+┃ ➤ ${global.settings.autoSeen ? "🟢 ON" : "🔴 OFF"}
 
 ┃ 3️⃣ ➤ Anti Delete 🚫
-┃ ➤ ${settings.antiDelete ? "🟢 ON" : "🔴 OFF"}
+┃ ➤ ${global.settings.antiDelete ? "🟢 ON" : "🔴 OFF"}
 
 ╰━━━━━━━━━━━━━━━━━━⬣
 
-💡 Reply Number To Change Setting
+💡 Reply Only Number
 `;
 
-await conn.sendMessage(from, {
-    image: {
-        url: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true"
+await conn.sendMessage(from,{
+    image:{
+        url:"https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true"
     },
     caption: txt,
-    mentions: [sender]
-}, { quoted: mek });
+    mentions:[sender]
+},{quoted:mek});
 
 });
 
@@ -58,39 +59,48 @@ async (conn, mek, m, {
 }) => {
 
 if(body === "1"){
-    settings.autoReact = !settings.autoReact;
 
-    return reply(
-        `😍 Auto React ${
-            settings.autoReact
-            ? "Enabled 🟢"
-            : "Disabled 🔴"
-        }`
-    );
+global.settings.autoReact =
+!global.settings.autoReact;
+
+return reply(
+`😍 Auto React ${
+global.settings.autoReact
+? "Enabled 🟢"
+: "Disabled 🔴"
+}`
+);
+
 }
 
 if(body === "2"){
-    settings.autoSeen = !settings.autoSeen;
 
-    return reply(
-        `👀 Auto Seen ${
-            settings.autoSeen
-            ? "Enabled 🟢"
-            : "Disabled 🔴"
-        }`
-    );
+global.settings.autoSeen =
+!global.settings.autoSeen;
+
+return reply(
+`👀 Auto Seen ${
+global.settings.autoSeen
+? "Enabled 🟢"
+: "Disabled 🔴"
+}`
+);
+
 }
 
 if(body === "3"){
-    settings.antiDelete = !settings.antiDelete;
 
-    return reply(
-        `🚫 Anti Delete ${
-            settings.antiDelete
-            ? "Enabled 🟢"
-            : "Disabled 🔴"
-        }`
-    );
+global.settings.antiDelete =
+!global.settings.antiDelete;
+
+return reply(
+`🚫 Anti Delete ${
+global.settings.antiDelete
+? "Enabled 🟢"
+: "Disabled 🔴"
+}`
+);
+
 }
 
 });
@@ -102,27 +112,24 @@ cmd({
 },
 async (conn, mek, m) => {
 
-if(!settings.autoReact) return;
+if(!global.settings.autoReact) return;
 
 const emojis = [
-    "😍",
-    "🔥",
-    "⚡",
-    "💀",
-    "🥶",
-    "😎",
-    "😂"
+"😍","🔥","⚡","💀","🥶","😎","😂"
 ];
 
 const emoji =
-    emojis[Math.floor(Math.random() * emojis.length)];
+emojis[Math.floor(Math.random()*emojis.length)];
 
-await conn.sendMessage(mek.key.remoteJid, {
-    react: {
-        text: emoji,
-        key: mek.key
-    }
-});
+await conn.sendMessage(
+mek.key.remoteJid,
+{
+react:{
+text:emoji,
+key:mek.key
+}
+}
+);
 
 });
 
@@ -133,7 +140,7 @@ cmd({
 },
 async (conn, mek, m) => {
 
-if(!settings.autoSeen) return;
+if(!global.settings.autoSeen) return;
 
 await conn.readMessages([mek.key]);
 
@@ -148,16 +155,10 @@ async (conn, mek, m, {
     from
 }) => {
 
-if(!settings.antiDelete) return;
+if(!global.settings.antiDelete) return;
 
-try {
-
-await conn.sendMessage(from, {
-    text: "🚫 Message Deleted!"
+await conn.sendMessage(from,{
+text:"🚫 Message Deleted!"
 });
-
-} catch (e) {
-console.log(e);
-}
 
 });

@@ -38,7 +38,7 @@ const txt = `
 
 await conn.sendMessage(from, {
     image: {
-        url: "https://files.catbox.moe/8f6m8w.jpg"
+        url: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true"
     },
     caption: txt,
     mentions: [sender]

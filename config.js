@@ -5,7 +5,7 @@ function convertToBool(text, fault = 'true') {
     return text === fault ? true : false;
 }
 module.exports = {
-SESSION_ID: process.env.SESSION_ID || "MF0gXK4B#3ijaDH6unfmbD_nOSw5zX8V7GGIQQ0FPlW8zcnZjjuM",
+SESSION_ID: process.env.SESSION_ID || "MRNCnAJA#1M579b-Rs3InHI_mDbbTAbJW0bxj05F465BSwP3-YT4",
 ALIVE_IMG: process.env.ALIVE_IMG || "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true",
 ALIVE_MSG: process.env.ALIVE_MSG || "*✨ Hello, SITHIJA MD is now alive and running successfully! 🚀*",
     

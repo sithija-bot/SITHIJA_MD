@@ -26,6 +26,7 @@ const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const qrcode = require('qrcode-terminal');
+const NodeCache = require('node-cache');
 
 const config = require('./config');
 const { sms, downloadMediaMessage } = require('./lib/msg');
@@ -41,6 +42,30 @@ const port = process.env.PORT || 8000;
 const prefix = '.';
 const ownerNumber = ['94785936039'];
 const credsPath = path.join(__dirname, '/auth_info_baileys/creds.json');
+const msgRetryCounterCache = new NodeCache();
+
+const cooldown = new Map();
+const groupCooldown = new Map();
+
+function antiSpam(sender, isGroup = false) {
+  const map = isGroup ? groupCooldown : cooldown;
+
+  if (map.has(sender)) {
+    return false;
+  }
+
+  map.set(sender, true);
+
+  setTimeout(() => {
+    map.delete(sender);
+  }, isGroup ? 8000 : 4000);
+
+  return true;
+}
+
+async function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function ensureSessionFile() {
   if (!fs.existsSync(credsPath)) {
@@ -83,25 +108,50 @@ async function connectToWA() {
   const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, '/auth_info_baileys/'));
   const { version } = await fetchLatestBaileysVersion();
 
-  const test = makeWASocket({
-    logger: P({ level: 'silent' }),
-    printQRInTerminal: false,
-    browser: Browsers.macOS("Firefox"),
-    auth: state,
-    version,
-    syncFullHistory: true,
-    markOnlineOnConnect: true,
-    generateHighQualityLinkPreview: true,
-  });
+const test = makeWASocket({
+  logger: P({ level: 'silent' }),
+  printQRInTerminal: false,
+  browser: Browsers.macOS("Firefox"),
+  auth: state,
+  version,
 
+  syncFullHistory: false,
+  markOnlineOnConnect: false,
+  generateHighQualityLinkPreview: true,
+
+  defaultQueryTimeoutMs: undefined,
+  connectTimeoutMs: 60000,
+  keepAliveIntervalMs: 10000,
+
+  msgRetryCounterCache,
+
+  emitOwnEvents: false,
+  fireInitQueries: true,
+
+  retryRequestDelayMs: 250,
+  maxMsgRetryCount: 5,
+});
+  
   test.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect } = update;
-    if (connection === 'close') {
-      if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut) {
-        connectToWA();
-      }
-    } else if (connection === 'open') {
-      console.log('✅ SITHIJA-MD connected to WhatsApp');
+if (connection === 'close') {
+
+  console.log("❌ Connection closed");
+
+  const shouldReconnect =
+    lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+
+  if (shouldReconnect) {
+    console.log("🔄 Reconnecting...");
+
+    setTimeout(() => {
+      connectToWA();
+    }, 5000);
+  }
+
+} else if (connection === 'open') {
+
+  console.log('✅ SITHIJA-MD connected to WhatsApp');
 
       const up = `SITHIJA-MD connected ✅\n\nPREFIX: ${prefix}`;
       await test.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
@@ -159,7 +209,12 @@ async function connectToWA() {
           const emojis = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '💜', '💙', '🌝', '🖤', '💚'];
           const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-          await test.sendMessage(mek.key.participant, {
+         await delay(3000);
+
+      if (Math.random() > 0.4) return;
+
+        await test.sendMessage(mek.key.participant, {
+  
             react: {
               text: randomEmoji,
               key: mek.key,
@@ -171,7 +226,22 @@ async function connectToWA() {
         }
       }
     } // <-- වැරැද්ද තිබුණේ මෙතැන (වරහන වසා නොතිබීම)
+    
+  if (mek.key.remoteJid === "status@broadcast") return;
 
+if (mek.message?.call) return;
+
+if (mek.key.remoteJid?.includes("broadcast")) return;
+
+const spamCheck = antiSpam(
+  mek.key.participant || mek.key.remoteJid,
+  mek.key.remoteJid.endsWith("@g.us")
+);
+
+if (!spamCheck) return;
+
+await delay(1500);
+    
     const m = sms(test, mek);
     const type = getContentType(mek.message);
     const from = mek.key.remoteJid;

@@ -74,35 +74,27 @@ async function ensureSessionFile() {
   }
 }
 
+
 const antiDeletePlugin = require('./plugins/antidelete.js');
 global.pluginHooks = global.pluginHooks || [];
 global.pluginHooks.push(antiDeletePlugin);
 
+
 async function connectToWA() {
-  console.log("Connecting SITHIJA-MD 🧬...");
+  console.log("Connecting test-MD 🧬...");
   const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, '/auth_info_baileys/'));
   const { version } = await fetchLatestBaileysVersion();
 
-const test = makeWASocket({
-  logger: P({ level: 'silent' }),
-  printQRInTerminal: false,
-  browser: Browsers.macOS("Firefox"),
-  auth: state,
-  version,
-
-  syncFullHistory: false,
-  markOnlineOnConnect: false,
-  generateHighQualityLinkPreview: false,
-
-  emitOwnEvents: false,
-  fireInitQueries: false,
-
-  retryRequestDelayMs: 5000,
-  defaultQueryTimeoutMs: 60000,
-
-  connectTimeoutMs: 60000,
-  keepAliveIntervalMs: 30000,
-});
+  const test = makeWASocket({
+    logger: P({ level: 'silent' }),
+    printQRInTerminal: false,
+    browser: Browsers.macOS("Firefox"),
+    auth: state,
+    version,
+    syncFullHistory: true,
+    markOnlineOnConnect: true,
+    generateHighQualityLinkPreview: true,
+  });
 
   test.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect } = update;
@@ -112,20 +104,10 @@ const test = makeWASocket({
       }
     } else if (connection === 'open') {
       console.log('✅ SITHIJA-MD connected to WhatsApp');
-      
-const up = `╭━━━〔 *SITHIJA-MD* 〕━━━⬣
-┃
-┃ ✅ *Bot Connected Successfully*
-┃ 🌐 *Prefix* : ${prefix}
-┃ 💎 *Mode* : Public
-┃ ⚡ *Status* : Online
-┃
-╰━━━━━━━━━━━━━━⬣
 
-> POWERED BY SITHIJA-MD 🚀`;
-      
+      const up = `SITHIJA-MD connected ✅\n\nPREFIX: ${prefix}`;
       await test.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true` },
+        image: { url: `https://github.com/testwpbot/test12/blob/main/images/Danuwa%20-%20MD.png?raw=true` },
         caption: up
       });
 
@@ -149,8 +131,9 @@ const up = `╭━━━〔 *SITHIJA-MD* 〕━━━⬣
     const mek = messages[0];
     if (!mek || !mek.message) return;
     mek.message = getContentType(mek.message) === 'ephemeralMessage' ? mek.message.ephemeralMessage.message : mek.message;
+   
 
-    if (global.pluginHooks) {
+        if (global.pluginHooks) {
       for (const plugin of global.pluginHooks) {
         if (plugin.onMessage) {
           try {
@@ -161,76 +144,50 @@ const up = `╭━━━〔 *SITHIJA-MD* 〕━━━⬣
         }
       }
     }
+ 
+    
+    
+if (mek.key?.remoteJid === 'status@broadcast') {
+  const senderJid = mek.key.participant || mek.key.remoteJid || "unknown@s.whatsapp.net";
+  const mentionJid = senderJid.includes("@s.whatsapp.net") ? senderJid : senderJid + "@s.whatsapp.net";
 
-    if (mek.key?.remoteJid === 'status@broadcast') {
-      const senderJid = mek.key.participant || mek.key.remoteJid || "unknown@s.whatsapp.net";
-      
-      if (config.AUTO_STATUS_SEEN === "true") {
-        try {
-          await test.readMessages([mek.key]);
-          console.log(`[✓] Status seen: ${mek.key.id}`);
-        } catch (e) {
-          console.error("❌ Failed to mark status as seen:", e);
-        }
-      }
-      
-if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
-  try {
-
-    // 70% react chance
-    if (Math.random() < 0.7) {
-
-      const emojis = [
-        '❤️','🔥','😂','✨',
-        '💙','💜','😍','🥰'
-      ];
-
-      const randomEmoji =
-        emojis[Math.floor(Math.random() * emojis.length)];
-
-      // 2min - 6min delay
-      const reactDelay =
-        Math.floor(Math.random() * 240000) + 120000;
-
-      setTimeout(async () => {
-
-        await test.sendMessage(
-          mek.key.remoteJid,
-          {
-            react: {
-              text: randomEmoji,
-              key: mek.key,
-            }
-          }
-        );
-
-        console.log(
-          `[✓] Reacted with ${randomEmoji}`
-        );
-
-      }, reactDelay);
-
+  if (config.AUTO_STATUS_SEEN === "true") {
+    try {
+      await test.readMessages([mek.key]);
+      console.log(`[✓] Status seen: ${mek.key.id}`);
+    } catch (e) {
+      console.error("❌ Failed to mark status as seen:", e);
     }
-
-  } catch (e) {
-
-    console.error(
-      "❌ Failed to react:",
-      e
-    );
-
   }
-}
-    } // <-- වැරැද්ද තිබුණේ මෙතැන (වරහන වසා නොතිබීම)
 
-    const m = sms(test, mek);
-    const type = getContentType(mek.message);
-    const from = mek.key.remoteJid;
+  if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
+    try {
+      const emojis = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '💜', '💙', '🌝', '🖤', '💚'];
+      const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+      await test.sendMessage(mek.key.participant, {
+        react: {
+          text: randomEmoji,
+          key: mek.key,
+        }
+      });
+
+      console.log(`[✓] Reacted to status of ${mek.key.participant} with ${randomEmoji}`);
+    } catch (e) {
+      console.error("❌ Failed to react to status:", e);
+    }
+  }
+
+
+const m = sms(test, mek)
+const type = getContentType(mek.message)
+const content = JSON.stringify(mek.message)
+const from = mek.key.remoteJid
+const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.contextInfo != null ? mek.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
     const body = (type === 'conversation') ? mek.message.conversation :
       (type === 'extendedTextMessage') ? mek.message.extendedTextMessage.text :
         (type == 'imageMessage' && mek.message.imageMessage.caption) ? mek.message.imageMessage.caption :
           (type == 'videoMessage' && mek.message.videoMessage.caption) ? mek.message.videoMessage.caption : '';
-    
     const isCmd = body.startsWith(prefix);
     const commandName = isCmd ? body.slice(prefix.length).trim().split(" ")[0].toLowerCase() : '';
     const args = body.trim().split(/ +/).slice(1);
@@ -271,11 +228,12 @@ if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
       }
     }
 
+    const replyText = body;
     for (const handler of replyHandlers) {
-      if (handler.filter(body, { sender, message: mek })) {
+      if (handler.filter(replyText, { sender, message: mek })) {
         try {
           await handler.function(test, mek, m, {
-            from, quoted: mek, body: body, sender, reply,
+            from, quoted: mek, body: replyText, sender, reply,
           });
           break;
         } catch (e) {
@@ -285,6 +243,7 @@ if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
     }
   });
 
+  
   test.ev.on('messages.update', async (updates) => {
     if (global.pluginHooks) {
       for (const plugin of global.pluginHooks) {
@@ -299,6 +258,8 @@ if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
     }
   });
 }
+
+
 
 ensureSessionFile();
 

@@ -39,7 +39,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 
 const prefix = '.';
-const ownerNumber = ['94721640007'];
+const ownerNumber = ['94785936039'];
 const credsPath = path.join(__dirname, '/auth_info_baileys/creds.json');
 
 async function ensureSessionFile() {
@@ -102,8 +102,18 @@ async function connectToWA() {
       }
     } else if (connection === 'open') {
       console.log('✅ SITHIJA-MD connected to WhatsApp');
+      
+const up = `╭━━━〔 *SITHIJA-MD* 〕━━━⬣
+┃
+┃ ✅ *Bot Connected Successfully*
+┃ 🌐 *Prefix* : ${prefix}
+┃ 💎 *Mode* : Public
+┃ ⚡ *Status* : Online
+┃
+╰━━━━━━━━━━━━━━⬣
 
-      const up = `SITHIJA-MD connected ✅\n\nPREFIX: ${prefix}`;
+> POWERED BY SITHIJA-MD 🚀`;
+      
       await test.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
         image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true` },
         caption: up

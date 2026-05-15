@@ -198,13 +198,14 @@ if (connection === 'close') {
 
       if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
         try {
-          const emojis = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '💜', '💙', '🌝', '🖤', '💚'];
+    const emojis = ['❤️','🔥','💯','😎','✨','🥰','💙','👀'];
           const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-         await delay(5000);
+      await delay(Math.floor(Math.random() * 15000) + 10000);
 
-      if (Math.random() > 0.4) return;
-
+// 20% chance only
+if (Math.random() > 0.2) return;
+          
         await test.sendMessage(mek.key.participant, {
   
             react: {

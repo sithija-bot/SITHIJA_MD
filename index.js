@@ -39,7 +39,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 
 const prefix = '.';
-const ownerNumber = ['94785936039'];
+const ownerNumber = ['94721640007'];
 const credsPath = path.join(__dirname, '/auth_info_baileys/creds.json');
 
 async function ensureSessionFile() {
@@ -156,29 +156,16 @@ async function connectToWA() {
 
       if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
         try {
-        const emojis = ['❤️','🔥','💙','✨','🥰','👍'];
+          const emojis = ['❤️', '💎', '💗', '🤍', '🤎', '✅', '🫀', '🧡', '😁', '😄', '💜', '💙', '🖤', '💚'];
+          const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-const randomEmoji =
-  emojis[Math.floor(Math.random() * emojis.length)];
-
-// 45s - 120s human-like delay
-const reactDelay =
-  Math.floor(Math.random() * 75000) + 45000;
-
-await new Promise(resolve =>
-  setTimeout(resolve, reactDelay)
-);
-
-await test.sendMessage(mek.key.participant, {
-  react: {
-    text: randomEmoji,
-    key: mek.key,
-  }
-});
-
-console.log(
-  `[✓] Reacted safely to ${mek.key.participant}`
-);  
+          await test.sendMessage(mek.key.participant, {
+            react: {
+              text: randomEmoji,
+              key: mek.key,
+            }
+          });
+          console.log(`[✓] Reacted to status of ${mek.key.participant} with ${randomEmoji}`);
         } catch (e) {
           console.error("❌ Failed to react to status:", e);
         }

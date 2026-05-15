@@ -21,20 +21,20 @@ const port = process.env.PORT || 8000;
 
 const prefix = '.';
 const ownerNumber = ['94785936039'];
+
 const credsPath = path.join(__dirname, '/auth_info_baileys/creds.json');
 
-let isConnecting = false;
 let sock;
+let isConnecting = false;
 
-/* ================= GLOBAL COMMAND SYSTEM FIX ================= */
-global.commands = global.commands || [];
-global.replyHandlers = global.replyHandlers || [];
+global.commands = [];
+global.replyHandlers = [];
 
 /* ================= SESSION ================= */
 async function ensureSessionFile() {
   if (!fs.existsSync(credsPath)) {
     if (!config.SESSION_ID) {
-      console.error('❌ SESSION_ID missing');
+      console.error("❌ SESSION_ID missing");
       process.exit(1);
     }
 
@@ -59,7 +59,26 @@ async function ensureSessionFile() {
   }
 }
 
-/* ================= CONNECTION ================= */
+/* ================= PLUGINS ================= */
+function loadPlugins() {
+  global.commands = [];
+  global.replyHandlers = [];
+
+  fs.readdirSync("./plugins").forEach((file) => {
+    if (!file.endsWith(".js")) return;
+
+    delete require.cache[require.resolve(`./plugins/${file}`)];
+    const plugin = require(`./plugins/${file}`);
+
+    if (plugin?.cmd) global.commands.push(plugin.cmd);
+    if (Array.isArray(plugin?.commands)) global.commands.push(...plugin.commands);
+    if (plugin?.replyHandler) global.replyHandlers.push(plugin.replyHandler);
+  });
+
+  console.log(`✅ Plugins loaded: ${global.commands.length}`);
+}
+
+/* ================= CONNECT ================= */
 async function connectToWA() {
   if (isConnecting) return;
   isConnecting = true;
@@ -85,22 +104,13 @@ async function connectToWA() {
     const { connection, lastDisconnect } = u;
 
     if (connection === 'open') {
-      console.log('✅ SITHIJA-MD connected');
+      console.log('✅ Connected');
       isConnecting = false;
+
+      loadPlugins();
 
       await sock.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
         text: "SITHIJA-MD connected ✅"
-      });
-
-      /* 🔥 FIX: reload plugins clean */
-      global.commands = [];
-      global.replyHandlers = [];
-
-      fs.readdirSync("./plugins").forEach((file) => {
-        if (file.endsWith(".js")) {
-          delete require.cache[require.resolve(`./plugins/${file}`)];
-          require(`./plugins/${file}`);
-        }
       });
     }
 
@@ -111,11 +121,13 @@ async function connectToWA() {
 
       console.log("❌ Connection closed:", code);
 
-      if (code !== DisconnectReason.loggedOut && code !== 440) {
-        setTimeout(connectToWA, 4000);
-      } else {
-        console.log("❌ Session broken - scan QR again");
+      // 🔥 FIX 440 / LOGGED OUT
+      if (code === DisconnectReason.loggedOut || code === 440) {
+        console.log("❌ Session broken - delete auth folder");
+        return;
       }
+
+      setTimeout(connectToWA, 4000);
     }
   });
 
@@ -124,7 +136,7 @@ async function connectToWA() {
   /* ================= MESSAGE HANDLER ================= */
   sock.ev.on('messages.upsert', async ({ messages }) => {
     const mek = messages[0];
-    if (!mek || !mek.message) return;
+    if (!mek?.message) return;
 
     mek.message =
       getContentType(mek.message) === 'ephemeralMessage'
@@ -147,21 +159,16 @@ async function connectToWA() {
         : '';
 
     const isCmd = body.startsWith(prefix);
-    const commandName = isCmd
-      ? body.slice(prefix.length).split(" ")[0].toLowerCase()
-      : '';
-
+    const commandName = isCmd ? body.slice(1).split(" ")[0].toLowerCase() : '';
     const args = body.split(/ +/).slice(1);
 
     const reply = (text) =>
       sock.sendMessage(from, { text }, { quoted: mek });
 
-    /* ================= COMMAND FIX ================= */
+    /* ================= COMMAND ================= */
     if (isCmd) {
       const cmd = global.commands.find(
-        (c) =>
-          c.pattern === commandName ||
-          (c.alias && c.alias.includes(commandName))
+        (c) => c.pattern === commandName || (c.alias && c.alias.includes(commandName))
       );
 
       if (cmd) {
@@ -179,7 +186,7 @@ async function connectToWA() {
       }
     }
 
-    /* ================= REPLY FIX ================= */
+    /* ================= REPLY ================= */
     for (const h of global.replyHandlers) {
       if (h.filter(body, { message: mek })) {
         try {
@@ -191,11 +198,13 @@ async function connectToWA() {
       }
     }
 
-    /* ================= STATUS ================= */
+    /* ================= STATUS FIX ================= */
     if (from === 'status@broadcast') {
       try {
+        // 👁️ seen
         await sock.readMessages([mek.key]);
 
+        // ❤️ react
         const emojis = ['❤️','🔥','💯','💫','💙','💚','💜','🖤','✨','🌸'];
         const emoji = emojis[Math.floor(Math.random() * emojis.length)];
 
@@ -205,8 +214,9 @@ async function connectToWA() {
           });
         }
 
+        console.log("✅ Status seen + reacted");
       } catch (e) {
-        console.log("Status error", e);
+        console.log("❌ Status error", e);
       }
     }
   });

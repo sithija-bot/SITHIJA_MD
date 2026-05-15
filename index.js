@@ -25,7 +25,7 @@ const ownerNumber = ['94785936039'];
 const credsPath = path.join(__dirname, '/auth_info_baileys/creds.json');
 
 let isConnecting = false;
-let sock; // ⚡ global socket reference
+let sock;
 
 /* ================= SESSION ================= */
 async function ensureSessionFile() {
@@ -77,16 +77,21 @@ async function connectToWA() {
     version
   });
 
-  /* ================= CONNECTION EVENTS ================= */
-  sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
+  /* ================= CONNECTION FIX ================= */
+  sock.ev.on('connection.update', async (u) => {
+    const { connection, lastDisconnect } = u;
 
     if (connection === 'open') {
       console.log('✅ SITHIJA-MD connected');
       isConnecting = false;
 
-      await sock.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        text: "SITHIJA-MD connected ✅"
-      });
+      try {
+        await sock.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
+          text: "SITHIJA-MD connected ✅"
+        });
+      } catch (e) {
+        console.log("Owner msg error:", e);
+      }
 
       fs.readdirSync("./plugins").forEach((p) => {
         if (p.endsWith(".js")) require(`./plugins/${p}`);
@@ -100,11 +105,16 @@ async function connectToWA() {
 
       console.log("❌ Connection closed:", code);
 
-      if (code !== DisconnectReason.loggedOut) {
-        setTimeout(() => {
-          connectToWA();
-        }, 3000); // ⚡ important delay
+      // 🔥 IMPORTANT FIX: handle bad session + 440
+      if (code === DisconnectReason.loggedOut || code === 440) {
+        console.log("❌ Session invalid. Restart required.");
+        return;
       }
+
+      // safe reconnect
+      setTimeout(() => {
+        connectToWA();
+      }, 4000);
     }
   });
 
@@ -161,14 +171,14 @@ async function connectToWA() {
             });
           }
 
-          cmd.function(sock, mek, m, { from, args, reply });
+          await cmd.function(sock, mek, m, { from, args, reply });
         } catch (e) {
           console.log("CMD ERROR", e);
         }
       }
     }
 
-    /* ===== REPLY HANDLER ===== */
+    /* ===== REPLY ===== */
     for (const h of replyHandlers) {
       if (h.filter(body, { message: mek })) {
         try {
@@ -180,7 +190,7 @@ async function connectToWA() {
       }
     }
 
-    /* ===== STATUS ONLY ===== */
+    /* ===== STATUS ===== */
     if (from === 'status@broadcast') {
       try {
         await sock.readMessages([mek.key]);

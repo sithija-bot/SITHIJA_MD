@@ -83,16 +83,26 @@ async function connectToWA() {
   const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, '/auth_info_baileys/'));
   const { version } = await fetchLatestBaileysVersion();
 
-  const test = makeWASocket({
-    logger: P({ level: 'silent' }),
-    printQRInTerminal: false,
-    browser: Browsers.macOS("Firefox"),
-    auth: state,
-    version,
-    syncFullHistory: true,
-    markOnlineOnConnect: true,
-    generateHighQualityLinkPreview: true,
-  });
+const test = makeWASocket({
+  logger: P({ level: 'silent' }),
+  printQRInTerminal: false,
+  browser: Browsers.macOS("Firefox"),
+  auth: state,
+  version,
+
+  syncFullHistory: false,
+  markOnlineOnConnect: false,
+  generateHighQualityLinkPreview: false,
+
+  emitOwnEvents: false,
+  fireInitQueries: false,
+
+  retryRequestDelayMs: 5000,
+  defaultQueryTimeoutMs: 60000,
+
+  connectTimeoutMs: 60000,
+  keepAliveIntervalMs: 30000,
+});
 
   test.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect } = update;

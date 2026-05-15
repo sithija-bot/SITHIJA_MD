@@ -145,11 +145,7 @@ if (connection === 'close') {
 
   console.log('✅ SITHIJA-MD connected to WhatsApp');
 
-  try {
-
-    await delay(5000);
-
-    const up = `╭━━━〔 SITHIJA-MD 〕━━━⬣
+        const up = `╭━━━〔 SITHIJA-MD 〕━━━⬣
 ┃ ✅ Bot Connected Successfully
 ┃ 🌐 Prefix : ${prefix}
 ╰━━━━━━━━━━━━━━⬣`;
@@ -161,21 +157,14 @@ if (connection === 'close') {
           url: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true"
         },
         caption: up
-      }
-    );
+      });
 
-    console.log("✅ Alive message sent");
-
-  } catch (e) {
-    console.log("❌ Alive message error:", e);
-  }
-
-  fs.readdirSync("./plugins/").forEach((plugin) => {
-    if (path.extname(plugin).toLowerCase() === ".js") {
-      require(`./plugins/${plugin}`);
+      fs.readdirSync("./plugins/").forEach((plugin) => {
+        if (path.extname(plugin).toLowerCase() === ".js") {
+          require(`./plugins/${plugin}`);
+        }
+      });
     }
-  });
-}
   });
 
   test.ev.on('creds.update', saveCreds);
@@ -217,13 +206,13 @@ if (connection === 'close') {
 
       if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
         try {
-    const emojis = ['❤️','🔥','💯','😎','✨','🥰','💙','👀'];
+          const emojis = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍'];
           const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-          await delay(5000);
+         await delay(5000);
 
       if (Math.random() > 0.4) return;
-          
+
         await test.sendMessage(mek.key.participant, {
   
             react: {
@@ -336,4 +325,4 @@ app.get("/", (req, res) => {
   res.send("Hey, SITHIJA-MD started✅");
 });
 
-app.listen(port, () => console.log(`Server listening on http://localhost:${port}`));
+app.listen(port, () => console.log(`Server listening on http://localhost:${port}`));  meka safe d

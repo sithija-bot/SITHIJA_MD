@@ -191,7 +191,7 @@ if (mek.key?.remoteJid === 'status@broadcast') {
         console.error("❌ Failed to forward text status:", e);
       }
     }
-  }
+  
   
 const m = sms(test, mek)
 const type = getContentType(mek.message)

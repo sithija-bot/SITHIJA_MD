@@ -141,14 +141,6 @@ if (connection === 'close') {
   const shouldReconnect =
     lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
 
-  if (shouldReconnect) {
-    console.log("🔄 Reconnecting...");
-
-    setTimeout(() => {
-      connectToWA();
-    }, 5000);
-  }
-
 } else if (connection === 'open') {
 
   console.log('✅ SITHIJA-MD connected to WhatsApp');

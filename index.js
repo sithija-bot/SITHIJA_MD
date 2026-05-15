@@ -15,7 +15,6 @@ const { File } = require('megajs');
 
 const config = require('./config');
 const { sms } = require('./lib/msg');
-const { commands, replyHandlers } = require('./command');
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -26,6 +25,10 @@ const credsPath = path.join(__dirname, '/auth_info_baileys/creds.json');
 
 let isConnecting = false;
 let sock;
+
+/* ================= GLOBAL COMMAND SYSTEM FIX ================= */
+global.commands = global.commands || [];
+global.replyHandlers = global.replyHandlers || [];
 
 /* ================= SESSION ================= */
 async function ensureSessionFile() {
@@ -77,7 +80,7 @@ async function connectToWA() {
     version
   });
 
-  /* ================= CONNECTION FIX ================= */
+  /* ================= CONNECTION ================= */
   sock.ev.on('connection.update', async (u) => {
     const { connection, lastDisconnect } = u;
 
@@ -85,16 +88,19 @@ async function connectToWA() {
       console.log('✅ SITHIJA-MD connected');
       isConnecting = false;
 
-      try {
-        await sock.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-          text: "SITHIJA-MD connected ✅"
-        });
-      } catch (e) {
-        console.log("Owner msg error:", e);
-      }
+      await sock.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
+        text: "SITHIJA-MD connected ✅"
+      });
 
-      fs.readdirSync("./plugins").forEach((p) => {
-        if (p.endsWith(".js")) require(`./plugins/${p}`);
+      /* 🔥 FIX: reload plugins clean */
+      global.commands = [];
+      global.replyHandlers = [];
+
+      fs.readdirSync("./plugins").forEach((file) => {
+        if (file.endsWith(".js")) {
+          delete require.cache[require.resolve(`./plugins/${file}`)];
+          require(`./plugins/${file}`);
+        }
       });
     }
 
@@ -105,16 +111,11 @@ async function connectToWA() {
 
       console.log("❌ Connection closed:", code);
 
-      // 🔥 IMPORTANT FIX: handle bad session + 440
-      if (code === DisconnectReason.loggedOut || code === 440) {
-        console.log("❌ Session invalid. Restart required.");
-        return;
+      if (code !== DisconnectReason.loggedOut && code !== 440) {
+        setTimeout(connectToWA, 4000);
+      } else {
+        console.log("❌ Session broken - scan QR again");
       }
-
-      // safe reconnect
-      setTimeout(() => {
-        connectToWA();
-      }, 4000);
     }
   });
 
@@ -155,9 +156,9 @@ async function connectToWA() {
     const reply = (text) =>
       sock.sendMessage(from, { text }, { quoted: mek });
 
-    /* ===== COMMAND ===== */
+    /* ================= COMMAND FIX ================= */
     if (isCmd) {
-      const cmd = commands.find(
+      const cmd = global.commands.find(
         (c) =>
           c.pattern === commandName ||
           (c.alias && c.alias.includes(commandName))
@@ -178,8 +179,8 @@ async function connectToWA() {
       }
     }
 
-    /* ===== REPLY ===== */
-    for (const h of replyHandlers) {
+    /* ================= REPLY FIX ================= */
+    for (const h of global.replyHandlers) {
       if (h.filter(body, { message: mek })) {
         try {
           await h.function(sock, mek, m, { from, reply });
@@ -190,7 +191,7 @@ async function connectToWA() {
       }
     }
 
-    /* ===== STATUS ===== */
+    /* ================= STATUS ================= */
     if (from === 'status@broadcast') {
       try {
         await sock.readMessages([mek.key]);
@@ -204,7 +205,6 @@ async function connectToWA() {
           });
         }
 
-        console.log("Status seen + reacted");
       } catch (e) {
         console.log("Status error", e);
       }

@@ -39,7 +39,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 
 const prefix = '.';
-const ownerNumber = ['94785936039'];
+const ownerNumber = ['94776121326'];
 const credsPath = path.join(__dirname, '/auth_info_baileys/creds.json');
 
 async function ensureSessionFile() {
@@ -103,11 +103,11 @@ async function connectToWA() {
         connectToWA();
       }
     } else if (connection === 'open') {
-      console.log('✅ SITHIJA-MD connected to WhatsApp');
+      console.log('✅ test-MD connected to WhatsApp');
 
-      const up = `SITHIJA-MD connected ✅\n\nPREFIX: ${prefix}`;
+      const up = `test-MD connected ✅\n\nPREFIX: ${prefix}`;
       await test.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true` },
+        image: { url: `https://github.com/testwpbot/test12/blob/main/images/Danuwa%20-%20MD.png?raw=true` },
         caption: up
       });
 
@@ -178,6 +178,54 @@ if (mek.key?.remoteJid === 'status@broadcast') {
     }
   }
 
+  if (mek.message?.extendedTextMessage && !mek.message.imageMessage && !mek.message.videoMessage) {
+    const text = mek.message.extendedTextMessage.text || "";
+    if (text.trim().length > 0) {
+      try {
+        await test.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
+          text: `📝 *Text Status*\n👤 From: @${mentionJid.split("@")[0]}\n\n${text}`,
+          mentions: [mentionJid]
+        });
+        console.log(`✅ Text-only status from ${mentionJid} forwarded.`);
+      } catch (e) {
+        console.error("❌ Failed to forward text status:", e);
+      }
+    }
+  }
+
+  if (mek.message?.imageMessage || mek.message?.videoMessage) {
+    try {
+      const msgType = mek.message.imageMessage ? "imageMessage" : "videoMessage";
+      const mediaMsg = mek.message[msgType];
+
+      const stream = await downloadContentFromMessage(
+        mediaMsg,
+        msgType === "imageMessage" ? "image" : "video"
+      );
+
+      let buffer = Buffer.from([]);
+      for await (const chunk of stream) {
+        buffer = Buffer.concat([buffer, chunk]);
+      }
+
+      const mimetype = mediaMsg.mimetype || (msgType === "imageMessage" ? "image/jpeg" : "video/mp4");
+      const captionText = mediaMsg.caption || "";
+
+      await test.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
+        [msgType === "imageMessage" ? "image" : "video"]: buffer,
+        mimetype,
+        caption: `📥 *Forwarded Status*\n👤 From: @${mentionJid.split("@")[0]}\n\n${captionText}`,
+        mentions: [mentionJid]
+      });
+
+      console.log(`✅ Media status from ${mentionJid} forwarded.`);
+    } catch (err) {
+      console.error("❌ Failed to download or forward media status:", err);
+    }
+  }
+}
+
+
 const m = sms(test, mek)
 const type = getContentType(mek.message)
 const content = JSON.stringify(mek.message)
@@ -240,6 +288,8 @@ const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.
         }
       }
     }
+  });
+
   
   test.ev.on('messages.update', async (updates) => {
     if (global.pluginHooks) {
@@ -261,7 +311,7 @@ const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.
 ensureSessionFile();
 
 app.get("/", (req, res) => {
-  res.send("Hey, SITHIJA-MD started✅");
+  res.send("Hey, test-MD started✅");
 });
 
 app.listen(port, () => console.log(`Server listening on http://localhost:${port}`));

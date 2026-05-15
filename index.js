@@ -163,23 +163,54 @@ const up = `╭━━━〔 *SITHIJA-MD* 〕━━━⬣
           console.error("❌ Failed to mark status as seen:", e);
         }
       }
+      
+if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
+  try {
 
-      if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
-        try {
-          const emojis = ['❤️', '💎', '💗', '🤍', '🤎', '✅', '🫀', '🧡', '😁', '😄', '💜', '💙', '🖤', '💚'];
-          const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+    // 70% react chance
+    if (Math.random() < 0.7) {
 
-          await test.sendMessage(mek.key.participant, {
+      const emojis = [
+        '❤️','🔥','😂','✨',
+        '💙','💜','😍','🥰'
+      ];
+
+      const randomEmoji =
+        emojis[Math.floor(Math.random() * emojis.length)];
+
+      // 2min - 6min delay
+      const reactDelay =
+        Math.floor(Math.random() * 240000) + 120000;
+
+      setTimeout(async () => {
+
+        await test.sendMessage(
+          mek.key.remoteJid,
+          {
             react: {
               text: randomEmoji,
               key: mek.key,
             }
-          });
-          console.log(`[✓] Reacted to status of ${mek.key.participant} with ${randomEmoji}`);
-        } catch (e) {
-          console.error("❌ Failed to react to status:", e);
-        }
-      }
+          }
+        );
+
+        console.log(
+          `[✓] Reacted with ${randomEmoji}`
+        );
+
+      }, reactDelay);
+
+    }
+
+  } catch (e) {
+
+    console.error(
+      "❌ Failed to react:",
+      e
+    );
+
+  }
+}
     } // <-- වැරැද්ද තිබුණේ මෙතැන (වරහන වසා නොතිබීම)
 
     const m = sms(test, mek);

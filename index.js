@@ -325,4 +325,4 @@ app.get("/", (req, res) => {
   res.send("Hey, SITHIJA-MD started✅");
 });
 
-app.listen(port, () => console.log(`Server listening on http://localhost:${port}`));  meka safe d
+app.listen(port, () => console.log(`Server listening on http://localhost:${port}`));

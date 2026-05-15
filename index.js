@@ -145,18 +145,37 @@ if (connection === 'close') {
 
   console.log('✅ SITHIJA-MD connected to WhatsApp');
 
-      const up = `SITHIJA-MD connected ✅\n\nPREFIX: ${prefix}`;
-      await test.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true` },
-        caption: up
-      });
+  try {
 
-      fs.readdirSync("./plugins/").forEach((plugin) => {
-        if (path.extname(plugin).toLowerCase() === ".js") {
-          require(`./plugins/${plugin}`);
-        }
-      });
+    await delay(5000);
+
+    const up = `╭━━━〔 SITHIJA-MD 〕━━━⬣
+┃ ✅ Bot Connected Successfully
+┃ 🌐 Prefix : ${prefix}
+╰━━━━━━━━━━━━━━⬣`;
+
+    await test.sendMessage(
+      ownerNumber[0] + "@s.whatsapp.net",
+      {
+        image: {
+          url: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true"
+        },
+        caption: up
+      }
+    );
+
+    console.log("✅ Alive message sent");
+
+  } catch (e) {
+    console.log("❌ Alive message error:", e);
+  }
+
+  fs.readdirSync("./plugins/").forEach((plugin) => {
+    if (path.extname(plugin).toLowerCase() === ".js") {
+      require(`./plugins/${plugin}`);
     }
+  });
+}
   });
 
   test.ev.on('creds.update', saveCreds);

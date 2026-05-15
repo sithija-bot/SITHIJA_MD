@@ -177,7 +177,6 @@ if (mek.key?.remoteJid === 'status@broadcast') {
       console.error("❌ Failed to react to status:", e);
     }
   }
-});
 
 const m = sms(test, mek)
 const type = getContentType(mek.message)
@@ -241,8 +240,6 @@ const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.
         }
       }
     }
-  });
-
   
   test.ev.on('messages.update', async (updates) => {
     if (global.pluginHooks) {

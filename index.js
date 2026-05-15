@@ -201,8 +201,9 @@ if (connection === 'close') {
     const emojis = ['❤️','🔥','💯','😎','✨','🥰','💙','👀'];
           const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-    await delay(7000); 
-if (Math.random() > 0.4) return;
+          await delay(5000);
+
+      if (Math.random() > 0.4) return;
           
         await test.sendMessage(mek.key.participant, {
   

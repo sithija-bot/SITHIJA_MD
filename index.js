@@ -2,9 +2,7 @@ const {
   default: makeWASocket,
   useMultiFileAuthState,
   DisconnectReason,
-  jidNormalizedUser,
   getContentType,
-  downloadContentFromMessage,
   fetchLatestBaileysVersion,
   Browsers
 } = require('@whiskeysockets/baileys');
@@ -17,10 +15,6 @@ const { File } = require('megajs');
 
 const config = require('./config');
 const { sms } = require('./lib/msg');
-const {
-  getGroupAdmins
-} = require('./lib/functions');
-
 const { commands, replyHandlers } = require('./command');
 
 const app = express();
@@ -30,6 +24,10 @@ const prefix = '.';
 const ownerNumber = ['94785936039'];
 const credsPath = path.join(__dirname, '/auth_info_baileys/creds.json');
 
+let isConnecting = false;
+let sock; // ⚡ global socket reference
+
+/* ================= SESSION ================= */
 async function ensureSessionFile() {
   if (!fs.existsSync(credsPath)) {
     if (!config.SESSION_ID) {
@@ -58,7 +56,11 @@ async function ensureSessionFile() {
   }
 }
 
+/* ================= CONNECTION ================= */
 async function connectToWA() {
+  if (isConnecting) return;
+  isConnecting = true;
+
   console.log("Connecting SITHIJA-MD...");
 
   const { state, saveCreds } = await useMultiFileAuthState(
@@ -67,7 +69,7 @@ async function connectToWA() {
 
   const { version } = await fetchLatestBaileysVersion();
 
-  const sock = makeWASocket({
+  sock = makeWASocket({
     logger: P({ level: 'silent' }),
     printQRInTerminal: false,
     browser: Browsers.macOS("Firefox"),
@@ -75,28 +77,40 @@ async function connectToWA() {
     version
   });
 
+  /* ================= CONNECTION EVENTS ================= */
   sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
-    if (connection === 'close') {
-      if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut) {
-        connectToWA();
-      }
-    }
 
     if (connection === 'open') {
       console.log('✅ SITHIJA-MD connected');
+      isConnecting = false;
 
       await sock.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        text: `SITHIJA-MD connected ✅`
+        text: "SITHIJA-MD connected ✅"
       });
 
       fs.readdirSync("./plugins").forEach((p) => {
         if (p.endsWith(".js")) require(`./plugins/${p}`);
       });
     }
+
+    if (connection === 'close') {
+      isConnecting = false;
+
+      const code = lastDisconnect?.error?.output?.statusCode;
+
+      console.log("❌ Connection closed:", code);
+
+      if (code !== DisconnectReason.loggedOut) {
+        setTimeout(() => {
+          connectToWA();
+        }, 3000); // ⚡ important delay
+      }
+    }
   });
 
   sock.ev.on('creds.update', saveCreds);
 
+  /* ================= MESSAGE HANDLER ================= */
   sock.ev.on('messages.upsert', async ({ messages }) => {
     const mek = messages[0];
     if (!mek || !mek.message) return;
@@ -123,19 +137,15 @@ async function connectToWA() {
 
     const isCmd = body.startsWith(prefix);
     const commandName = isCmd
-      ? body.slice(prefix.length).trim().split(" ")[0].toLowerCase()
+      ? body.slice(prefix.length).split(" ")[0].toLowerCase()
       : '';
 
-    const args = body.trim().split(/ +/).slice(1);
-
-    const sender = mek.key.fromMe
-      ? sock.user.id
-      : mek.key.participant || mek.key.remoteJid;
+    const args = body.split(/ +/).slice(1);
 
     const reply = (text) =>
       sock.sendMessage(from, { text }, { quoted: mek });
 
-    /* ---------------- COMMAND HANDLER ---------------- */
+    /* ===== COMMAND ===== */
     if (isCmd) {
       const cmd = commands.find(
         (c) =>
@@ -151,48 +161,36 @@ async function connectToWA() {
             });
           }
 
-          cmd.function(sock, mek, m, {
-            from,
-            args,
-            reply
-          });
+          cmd.function(sock, mek, m, { from, args, reply });
         } catch (e) {
           console.log("CMD ERROR", e);
         }
       }
     }
 
-    /* ---------------- REPLY HANDLER ---------------- */
+    /* ===== REPLY HANDLER ===== */
     for (const h of replyHandlers) {
-      if (h.filter(body, { sender, message: mek })) {
+      if (h.filter(body, { message: mek })) {
         try {
           await h.function(sock, mek, m, { from, reply });
           break;
         } catch (e) {
-          console.log("Reply handler error", e);
+          console.log("Reply error", e);
         }
       }
     }
 
-    /* =====================================================
-       STATUS SEEN + REACT ONLY (NO FORWARDING)
-    ====================================================== */
-
+    /* ===== STATUS ONLY ===== */
     if (from === 'status@broadcast') {
       try {
-        // 👁️ seen
         await sock.readMessages([mek.key]);
 
-        // ❤️ random react
         const emojis = ['❤️','🔥','💯','💫','💙','💚','💜','🖤','✨','🌸'];
         const emoji = emojis[Math.floor(Math.random() * emojis.length)];
 
         if (mek.key.participant) {
           await sock.sendMessage(mek.key.participant, {
-            react: {
-              text: emoji,
-              key: mek.key
-            }
+            react: { text: emoji, key: mek.key }
           });
         }
 
@@ -204,6 +202,7 @@ async function connectToWA() {
   });
 }
 
+/* ================= START ================= */
 ensureSessionFile();
 
 app.get("/", (req, res) => {

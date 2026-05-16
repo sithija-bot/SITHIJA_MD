@@ -13,5 +13,6 @@ BOT_OWNER: '94785936039',  // Replace with the owner's phone number
 AUTO_STATUS_SEEN: 'true',
 AUTO_STATUS_REACT: 'true',
 ANTI_DELETE: true,
+AUTO_STATUS_FORWARD: 'false'
 
 };

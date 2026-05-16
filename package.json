@@ -2,7 +2,7 @@
   "name": "SITHIJA-MD",
   "version": "1",
   "description": "A Simple WhatsApp bot created By MR Sithija",
-  "main": "sithija.js",
+  "main": "index.js",
   "scripts": {
     "start": "pm2 start sithija.js --deep-monitoring --attach --name SITHIJA_MD",
     "stop": "pm2 stop SITHIJA_MD",

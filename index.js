@@ -79,7 +79,7 @@ global.pluginHooks = global.pluginHooks || [];
 global.pluginHooks.push(antiDeletePlugin);
 
 async function connectToWA() {
-  console.log("Connecting DANUWA-MD 🧬...");
+  console.log("Connecting SITHIJA-MD 🧬...");
   const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, '/auth_info_baileys/'));
   const { version } = await fetchLatestBaileysVersion();
 
@@ -101,9 +101,9 @@ async function connectToWA() {
         connectToWA();
       }
     } else if (connection === 'open') {
-      console.log('✅ DANUWA-MD connected to WhatsApp');
+      console.log('✅ SITHIJA-MD connected to WhatsApp');
 
-      const up = `DANUWA-MD connected ✅\n\nPREFIX: ${prefix}`;
+      const up = `SITHIJA-MD connected ✅\n\nPREFIX: ${prefix}`;
       await danuwa.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
         image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true` },
         caption: up
@@ -137,7 +137,7 @@ if (mek.key?.remoteJid === 'status@broadcast') {
 
   if (config.AUTO_STATUS_SEEN === "true") {
     try {
-      await conn.readMessages([mek.key]);
+      await danuwa.readMessages([mek.key]);
       console.log(`[✓] Status seen: ${mek.key.id}`);
     } catch (e) {
       console.error("❌ Failed to mark status as seen:", e);
@@ -149,7 +149,7 @@ if (mek.key?.remoteJid === 'status@broadcast') {
       const emojis = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '💜', '💙', '🌝', '🖤', '💚'];
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-      await conn.sendMessage(mek.key.participant, {
+      await danuwa.sendMessage(mek.key.participant, {
         react: {
           text: randomEmoji,
           key: mek.key,
@@ -223,12 +223,12 @@ if (mek.key?.remoteJid === 'status@broadcast') {
     }
   });
 
-  conn.ev.on('messages.update', async (updates) => {
+  danuwa.ev.on('messages.update', async (updates) => {
     if (global.pluginHooks) {
       for (const plugin of global.pluginHooks) {
         if (plugin.onDelete) {
           try {
-            await plugin.onDelete(conn, updates);
+            await plugin.onDelete(danuwa, updates);
           } catch (e) {
             console.log("onDelete error:", e);
           }

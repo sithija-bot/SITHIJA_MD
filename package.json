@@ -4,7 +4,7 @@
   "description": "A Simple WhatsApp bot created By MR Sithija",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start sithija.js --deep-monitoring --attach --name SITHIJA_MD",
+    "start": "pm2 start index.js --deep-monitoring --attach --name SITHIJA_MD",
     "stop": "pm2 stop SITHIJA_MD",
     "restart": "pm2 restart SITHIJA_MD"
   },

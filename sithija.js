@@ -29,7 +29,7 @@ const sess = require("./session");
 async function sessdl() {
   try {
     // Extract the Base64 encoded session data
-    const base64Data = sess.SESSION_ID.split("ANJU-XPRO~")[1];
+    const base64Data = sess.SESSION_ID.split("SITHIJA-MD~")[1];
     if (!base64Data) {
       throw new Error("Invalid SESSION_ID format - missing Base64 data");
     }

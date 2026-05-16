@@ -160,7 +160,9 @@ if (mek.key?.remoteJid === 'status@broadcast') {
     } catch (e) {
       console.error("❌ Failed to react to status:", e);
     }
-  }
+  } 
+  
+}
 
     const m = sms(danuwa, mek);
     const type = getContentType(mek.message);

@@ -383,13 +383,4 @@ async function connectToWA() {
       );
 
       let mediaBuffer = Buffer.from([]);
-      for await (const chunk of mediaStream) {
-        mediaBuffer = Buffer.concat([mediaBuffer, chunk]);
-      }
-
-      let detectedFileType = await FileType.fromBuffer(mediaBuffer);
-      let finalFileName = appendExtension
-        ? `${filename}.${detectedFileType.ext}`
-        : filename;
-
-      await fs.writeFileSync(finalFileName, media
+      for await

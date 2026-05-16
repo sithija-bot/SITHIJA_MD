@@ -28,53 +28,64 @@ if (!fs.existsSync(SESSION_DIR)) fs.mkdirSync(SESSION_DIR);
 const sess = require("./session");
 async function sessdl() {
   try {
-    // Extract the Base64 encoded session data
-    const base64Data = sess.SESSION_ID.split("SITHIJA-MD~")[1];
-    if (!base64Data) {
-      throw new Error("Invalid SESSION_ID format - missing Base64 data");
+    let sessionId = sess.SESSION_ID;
+
+    // Check SESSION_ID
+    if (!sessionId || typeof sessionId !== "string") {
+      throw new Error("SESSION_ID is missing");
     }
 
-    // Delete the SESSION_DIR if it exists
-    if (await fs.promises.stat(SESSION_DIR).catch(() => false)) {
-      await fs.promises.rm(SESSION_DIR, { recursive: true, force: true });
+    // Remove prefix if available
+    if (sessionId.startsWith("SITHIJA-MD~")) {
+      sessionId = sessionId.replace("SITHIJA-MD~", "");
+    }
+
+    // Clean unwanted spaces/new lines
+    sessionId = sessionId.trim();
+
+    // Delete old session folder
+    if (fs.existsSync(SESSION_DIR)) {
+      await fs.promises.rm(SESSION_DIR, {
+        recursive: true,
+        force: true,
+      });
       console.log("✅ Existing session directory deleted.");
     }
 
-    // Recreate the directory
-    try {
-      await fs.promises.mkdir(SESSION_DIR, { recursive: true });
-      console.log("📁 New session directory created.");
-    } catch (err) {
-      console.error("❌ Error creating session directory:", err);
-      return;
-    }
+    // Recreate session folder
+    await fs.promises.mkdir(SESSION_DIR, {
+      recursive: true,
+    });
+
+    console.log("📁 New session directory created.");
 
     const credsPath = path.join(SESSION_DIR, "creds.json");
 
-    // Decode and save the session data
     try {
-      // Decode from Base64
-      const decodedData = Buffer.from(base64Data, 'base64').toString('utf-8');
-      
-      // Parse the JSON data
+      // Decode Base64
+      const decodedData = Buffer.from(sessionId, "base64").toString("utf-8");
+
+      // Parse JSON
       const sessionData = JSON.parse(decodedData);
-      
-      // Write to creds.json
-      await fs.promises.writeFile(credsPath, JSON.stringify(sessionData, null, 2));
+
+      // Save creds.json
+      await fs.promises.writeFile(
+        credsPath,
+        JSON.stringify(sessionData, null, 2)
+      );
+
       console.log("✅ Session data decoded and saved to creds.json");
     } catch (err) {
       console.error("❌ Error processing session data:", err.message);
-      
-      // More specific error messages
+
       if (err instanceof SyntaxError) {
-        console.error("Invalid JSON format in session data");
-      } else if (err.message.includes("Invalid base64")) {
-        console.error("Invalid Base64 encoding in session data");
+        console.error("❌ Invalid JSON format in SESSION_ID");
       }
+
       throw err;
     }
   } catch (err) {
-    console.error("❌ Unexpected error in sessdl:", err);
+    console.error("❌ Unexpected error in sessdl:", err.message);
     throw err;
   }
 }

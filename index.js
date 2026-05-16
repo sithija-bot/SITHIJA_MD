@@ -87,12 +87,20 @@ async function connectToWA() {
     } else if (connection === 'open') {
       console.log('✅ SITHIJA-MD connected to WhatsApp');
 
-      const up = `SITHIJA-MD connected ✅\n\nPREFIX: ${prefix}`;
-      await sithija.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true` },
-        caption: up
-      });
+      try {
 
+  await sleep(3000);
+
+  await sithija.sendMessage(
+    ownerNumber[0] + "@s.whatsapp.net",
+    {
+      text: `✅ SITHIJA-MD Connected Successfully!\n\nPREFIX: ${prefix}`
+    }
+  );
+
+} catch (e) {
+  console.log("Owner Msg Error:", e);
+}
       fs.readdirSync("./plugins/").forEach((plugin) => {
         if (path.extname(plugin).toLowerCase() === ".js") {
           require(`./plugins/${plugin}`);

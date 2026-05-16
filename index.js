@@ -4,18 +4,6 @@ const {
   DisconnectReason,
   jidNormalizedUser,
   getContentType,
-  proto,
-  generateWAMessageContent,
-  generateWAMessage,
-  AnyMessageContent,
-  prepareWAMessageMedia,
-  areJidsSameUser,
-  downloadContentFromMessage,
-  MessageRetryMap,
-  generateForwardMessageContent,
-  generateWAMessageFromContent,
-  generateMessageID, makeInMemoryStore,
-  jidDecode,
   fetchLatestBaileysVersion,
   Browsers
 } = require('@whiskeysockets/baileys');
@@ -39,7 +27,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 
 const prefix = '.';
-const ownerNumber = ['94785936039'];
+const ownerNumber = ['94776121326'];
 const credsPath = path.join(__dirname, '/auth_info_baileys/creds.json');
 
 async function ensureSessionFile() {
@@ -74,12 +62,8 @@ async function ensureSessionFile() {
   }
 }
 
-const antiDeletePlugin = require('./plugins/antidelete.js');
-global.pluginHooks = global.pluginHooks || [];
-global.pluginHooks.push(antiDeletePlugin);
-
 async function connectToWA() {
-  console.log("Connecting SITHIJA-MD 🧬...");
+  console.log("Connecting DANUWA-MD 🧬...");
   const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, '/auth_info_baileys/'));
   const { version } = await fetchLatestBaileysVersion();
 
@@ -101,11 +85,11 @@ async function connectToWA() {
         connectToWA();
       }
     } else if (connection === 'open') {
-      console.log('✅ SITHIJA-MD connected to WhatsApp');
+      console.log('✅ DANUWA-MD connected to WhatsApp');
 
-      const up = `SITHIJA-MD connected ✅\n\nPREFIX: ${prefix}`;
+      const up = `DANUWA-MD connected ✅\n\nPREFIX: ${prefix}`;
       await danuwa.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true` },
+        image: { url: `https://github.com/DANUWA-MD/DANUWA-MD/blob/main/images/DANUWA-MD.png?raw=true` },
         caption: up
       });
 
@@ -130,19 +114,7 @@ async function connectToWA() {
     if (!mek || !mek.message) return;
 
     mek.message = getContentType(mek.message) === 'ephemeralMessage' ? mek.message.ephemeralMessage.message : mek.message;
-   
-if (mek.key?.remoteJid === 'status@broadcast') {
-  const senderJid = mek.key.participant || mek.key.remoteJid || "unknown@s.whatsapp.net";
-  const mentionJid = senderJid.includes("@s.whatsapp.net") ? senderJid : senderJid + "@s.whatsapp.net";
-
-  if (config.AUTO_STATUS_SEEN === "true") {
-    try {
-      await danuwa.readMessages([mek.key]);
-      console.log(`[✓] Status seen: ${mek.key.id}`);
-    } catch (e) {
-      console.error("❌ Failed to mark status as seen:", e);
-    }
-  }
+    if (mek.key.remoteJid === 'status@broadcast') return;
 
     const m = sms(danuwa, mek);
     const type = getContentType(mek.message);
@@ -202,24 +174,7 @@ if (mek.key?.remoteJid === 'status@broadcast') {
       }
     }
   });
-
-  danuwa.ev.on('messages.update', async (updates) => {
-    if (global.pluginHooks) {
-      for (const plugin of global.pluginHooks) {
-        if (plugin.onDelete) {
-          try {
-            await plugin.onDelete(danuwa, updates);
-          } catch (e) {
-            console.log("onDelete error:", e);
-          }
-        }
-      }
-    }
-  });
 }
-
-
-
 
 ensureSessionFile();
 

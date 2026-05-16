@@ -1,12 +1,15 @@
-const fs = require("fs");
-if (fs.existsSync("config.env"))
-  require("dotenv").config({ path: "./config.env" });
+const fs = require('fs');
+if (fs.existsSync('config.env')) require('dotenv').config({ path: './config.env' });
 
-function convertToBool(text, fault = "true") {
-  return text === fault ? true : false;
+function convertToBool(text, fault = 'true') {
+    return text === fault ? true : false;
 }
 module.exports = {
-  SESSION_ID: process.env.SESSION_ID || "lAcWFR7Y#Fn2cGZfcIjsU6QfTopeXeUMHxkUii64J-wOoTki10wc",
-  MONGODB: process.env.MONGODB || "mongodb://mongo:GveFmLLwRwDsRYbdcgYIfkRaRruinBiH@autorack.proxy.rlwy.net:16141",
-  OWNER_NUM: process.env.OWNER_NUM || "94785936039",
+SESSION_ID: process.env.SESSION_ID || "lAcWFR7Y#Fn2cGZfcIjsU6QfTopeXeUMHxkUii64J-wOoTki10wc",
+ALIVE_IMG: process.env.ALIVE_IMG || "https://github.com/DANUWA-MD/DANUWA-MD/blob/main/images/DANUWA-MD.png?raw=truehttps://github.com/sithija-bot/SITHIJA_MD/blob/main/ChatGPT%20Image%20May%2016,%202026,%2009_18_56%20PM.png?raw=true",
+ALIVE_MSG: process.env.ALIVE_MSG || "*Hello👋 SITHIJA-MD Is Alive Now👀*",
+BOT_OWNER: '94785936039',  // Replace with the owner's phone number
+
+
+
 };

@@ -144,26 +144,6 @@ if (mek.key?.remoteJid === 'status@broadcast') {
     }
   }
 
-  if (config.AUTO_STATUS_REACT === "true" && mek.key.participant) {
-    try {
-      const emojis = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '💜', '💙', '🌝', '🖤', '💚'];
-      const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-
-      await danuwa.sendMessage(mek.key.participant, {
-        react: {
-          text: randomEmoji,
-          key: mek.key,
-        }
-      });
-
-      console.log(`[✓] Reacted to status of ${mek.key.participant} with ${randomEmoji}`);
-    } catch (e) {
-      console.error("❌ Failed to react to status:", e);
-    }
-  } 
-  
-}
-
     const m = sms(danuwa, mek);
     const type = getContentType(mek.message);
     const from = mek.key.remoteJid;

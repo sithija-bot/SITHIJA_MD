@@ -20,7 +20,7 @@ const express = require("express");
 const app = express();
 const por = require("./session");
 const port = por.PORT;
-const ownerNumber = ["94785936039"];
+const ownerNumber = ["94717775628"];
 if (!app) return;
 // Session directory
 const SESSION_DIR = "./sessions";
@@ -28,64 +28,53 @@ if (!fs.existsSync(SESSION_DIR)) fs.mkdirSync(SESSION_DIR);
 const sess = require("./session");
 async function sessdl() {
   try {
-    let sessionId = sess.SESSION_ID;
-
-    // Check SESSION_ID
-    if (!sessionId || typeof sessionId !== "string") {
-      throw new Error("SESSION_ID is missing");
+    // Extract the Base64 encoded session data
+    const base64Data = sess.SESSION_ID.split("ANJU-XPRO~")[1];
+    if (!base64Data) {
+      throw new Error("Invalid SESSION_ID format - missing Base64 data");
     }
 
-    // Remove prefix if available
-    if (sessionId.startsWith("SITHIJA-MD~")) {
-      sessionId = sessionId.replace("SITHIJA-MD~", "");
-    }
-
-    // Clean unwanted spaces/new lines
-    sessionId = sessionId.trim();
-
-    // Delete old session folder
-    if (fs.existsSync(SESSION_DIR)) {
-      await fs.promises.rm(SESSION_DIR, {
-        recursive: true,
-        force: true,
-      });
+    // Delete the SESSION_DIR if it exists
+    if (await fs.promises.stat(SESSION_DIR).catch(() => false)) {
+      await fs.promises.rm(SESSION_DIR, { recursive: true, force: true });
       console.log("✅ Existing session directory deleted.");
     }
 
-    // Recreate session folder
-    await fs.promises.mkdir(SESSION_DIR, {
-      recursive: true,
-    });
-
-    console.log("📁 New session directory created.");
+    // Recreate the directory
+    try {
+      await fs.promises.mkdir(SESSION_DIR, { recursive: true });
+      console.log("📁 New session directory created.");
+    } catch (err) {
+      console.error("❌ Error creating session directory:", err);
+      return;
+    }
 
     const credsPath = path.join(SESSION_DIR, "creds.json");
 
+    // Decode and save the session data
     try {
-      // Decode Base64
-      const decodedData = Buffer.from(sessionId, "base64").toString("utf-8");
-
-      // Parse JSON
+      // Decode from Base64
+      const decodedData = Buffer.from(base64Data, 'base64').toString('utf-8');
+      
+      // Parse the JSON data
       const sessionData = JSON.parse(decodedData);
-
-      // Save creds.json
-      await fs.promises.writeFile(
-        credsPath,
-        JSON.stringify(sessionData, null, 2)
-      );
-
+      
+      // Write to creds.json
+      await fs.promises.writeFile(credsPath, JSON.stringify(sessionData, null, 2));
       console.log("✅ Session data decoded and saved to creds.json");
     } catch (err) {
       console.error("❌ Error processing session data:", err.message);
-
+      
+      // More specific error messages
       if (err instanceof SyntaxError) {
-        console.error("❌ Invalid JSON format in SESSION_ID");
+        console.error("Invalid JSON format in session data");
+      } else if (err.message.includes("Invalid base64")) {
+        console.error("Invalid Base64 encoding in session data");
       }
-
       throw err;
     }
   } catch (err) {
-    console.error("❌ Unexpected error in sessdl:", err.message);
+    console.error("❌ Unexpected error in sessdl:", err);
     throw err;
   }
 }
@@ -102,7 +91,7 @@ async function connectToWA() {
   const getPrefix = () => config.PREFIX;
   const getWelcome = () => config.WELCOME;
   //===========================
-  console.log("🔥 SITHIJA-MD is starting...");
+  console.log("🔥 SITHIJA-MD XPRO is starting...");
   const { state, saveCreds } = await useMultiFileAuthState(
     __dirname + "/sessions/"
   );
@@ -130,9 +119,9 @@ async function connectToWA() {
       console.log("connected to whatsapp ✅");
       // Assuming `config` contains all the settings
       let up = `
-          🚀 **© SITHIJA-MD 💚 Connected Successfully!** ✅ 
+          🚀 **© SITHIJA-MD� 𝗑ᴾᴿᴼ 💚 Connected Successfully!** ✅ 
           
-          --- **🎉 Welcome to © SITHIJA-MD 💚!** 🎉 
+          --- **🎉 Welcome to © SITHIJA-MD� 𝗑ᴾᴿᴼ 💚!** 🎉 
           ✦» 𝚅𝚎𝚛𝚜𝚒𝚘𝚗 : ${require("./package.json").version}
           ✦» 𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖 : ${os.platform()}
           ✦» 𝙷𝚘𝚜𝚝 : ${os.hostname()}
@@ -161,7 +150,7 @@ async function connectToWA() {
             config.AUTORECORDING ? "Enabled" : "Disabled"
           }
       
-          --- Thank you for using **© SITHIJA-MD 💚**. 
+          --- Thank you for using **© SITHIJA-MD� 𝗑ᴾᴿᴼ 💚**. 
           We're here to make your experience enjoyable and seamless. 
           If you need any help or have questions, don't hesitate to ask. 
           
@@ -170,22 +159,22 @@ async function connectToWA() {
       conn.sendMessage(conn.user.id, {
         text: up,
         contextInfo: {
-          mentionedJid: ["94785936039@s.whatsapp.net"], // specify mentioned JID(s) if any
+          mentionedJid: ["94717775628@s.whatsapp.net"], // specify mentioned JID(s) if any
           groupMentions: [],
           forwardingScore: 999,
           isForwarded: true,
           forwardedNewsletterMessageInfo: {
-            newsletterJid: "",
-            newsletterName: "© SITHIJA-MD💚",
+            newsletterJid: "120363299978149557@newsletter",
+            newsletterName: "© SITHIJA-MD� 𝗑ᴾᴿᴼ 💚",
             serverMessageId: 999,
           },
           externalAdReply: {
-            title: "© SITHIJA-MD 💚",
-            body: " ©MR SITHIJA 💚",
+            title: "© SITHIJA-MD� 𝗑ᴾᴿᴼ 💚",
+            body: " ©𝐌𝐑 𝐑𝐀𝐒𝐇𝐌𝐈𝐊𝐀 𝐎𝐅𝐂 💚",
             mediaType: 1,
             sourceUrl: "https://github.com/Mrrashmika",
             thumbnailUrl:
-              "https://github.com/sithija-bot/SITHIJA_MD/blob/main/images/alive.png?raw=true", // This should match the image URL provided above
+              "https://raw.githubusercontent.com/RASH-DATA/ANJU-DATA/refs/heads/main/LOGOS/6152181515400889311.jpg", // This should match the image URL provided above
             renderLargerThumbnail: false,
             showAdAttribution: true,
           },
@@ -412,7 +401,7 @@ async function connectToWA() {
 }
 if (!app) return;
 app.get("/", (req, res) => {
-  res.send("hey I am alive, SITHIJA-MD Is started✅");
+  res.send("hey I am alive, Queen_Anju Is started✅");
 });
 app.listen(port, () =>
   console.log(`Server listening on port http://localhost:${port}`)

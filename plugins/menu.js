@@ -28,29 +28,35 @@ cmd(
 📌 Select Menu Category Below
 `;
 
-      await danuwa.sendMessage(from, {
-        text: menuText,
-        footer: "Powered By Sithija",
-        buttons: [
-          {
-            buttonId: ".downloadmenu",
-            buttonText: { displayText: "📥 DOWNLOAD" },
-            type: 1
-          },
-          {
-            buttonId: ".groupmenu",
-            buttonText: { displayText: "👥 GROUP" },
-            type: 1
-          },
-          {
-            buttonId: ".ownermenu",
-            buttonText: { displayText: "👑 OWNER" },
-            type: 1
-          }
-        ],
-        headerType: 1
-      }, { quoted: mek });
-
+    await danuwa.sendMessage(from, {
+    image: { url: "https://files.catbox.moe/8tqwa6.jpg" },
+    caption: menuText,
+    footer: "Powered By Sithija",
+    templateButtons: [
+        {
+            index: 1,
+            quickReplyButton: {
+                displayText: "📥 DOWNLOAD",
+                id: ".downloadmenu"
+            }
+        },
+        {
+            index: 2,
+            quickReplyButton: {
+                displayText: "👥 GROUP",
+                id: ".groupmenu"
+            }
+        },
+        {
+            index: 3,
+            quickReplyButton: {
+                displayText: "👑 OWNER",
+                id: ".owner"
+            }
+        }
+    ]
+}, { quoted: mek });
+      
     } catch (err) {
       console.error(err);
       reply("❌ Error generating menu.");

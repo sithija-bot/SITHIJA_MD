@@ -73,7 +73,7 @@ cmd(
         from,
         {
           image: {
-            url: "https://files.catbox.moe/7mcy8w.jpg",
+            url: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/ChatGPT%20Image%20May%2016,%202026,%2009_18_56%20PM.png?raw=true",
           },
           caption: menu,
           contextInfo: {
@@ -83,7 +83,7 @@ cmd(
               title: "SITHIJA-MD WHATSAPP BOT",
               body: "Fast & Powerful Multi Device Bot",
               thumbnailUrl:
-                "https://files.catbox.moe/7mcy8w.jpg",
+                "https://github.com/sithija-bot/SITHIJA_MD/blob/main/ChatGPT%20Image%20May%2016,%202026,%2009_18_56%20PM.png?raw=true",
               sourceUrl: "https://github.com/",
               mediaType: 1,
               renderLargerThumbnail: true,

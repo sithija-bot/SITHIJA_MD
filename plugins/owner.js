@@ -4,7 +4,7 @@ const { cmd } = require("../command");
 cmd({
     pattern: "owner",
     desc: "Owner contact",
-    category: "owner",
+    category: "ownermenu",
     filename: __filename
 },
 async (danuwa, mek, m, { from }) => {

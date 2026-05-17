@@ -14,26 +14,10 @@ async (danuwa, mek, m, {
     groupAdmins, isBotAdmins, isAdmins, reply
 }) => {
     try {
-
-        await danuwa.sendMessage(from, {
+        return await danuwa.sendMessage(from, {
             image: { url: config.ALIVE_IMG },
-            caption: config.ALIVE_MSG,
-            footer: "Powered By Sithija",
-            buttons: [
-                {
-                    buttonId: ".menu",
-                    buttonText: { displayText: "📜 MENU" },
-                    type: 1
-                },
-                {
-                    buttonId: ".ping",
-                    buttonText: { displayText: "⚡ PING" },
-                    type: 1
-                }
-            ],
-            headerType: 4
+            caption: config.ALIVE_MSG
         }, { quoted: mek });
-
     } catch (e) {
         console.log(e);
         reply(`${e}`);

@@ -1,118 +1,146 @@
 const { cmd, commands } = require("../command");
 
+const pendingMenu = {};
+
+const headerImage =
+  "https://github.com/sithija-bot/SITHIJA_MD/blob/main/alive.png1.png?raw=true";
+
+const numberEmoji = [
+  "1️⃣",
+  "2️⃣",
+  "3️⃣",
+  "4️⃣",
+  "5️⃣",
+  "6️⃣",
+  "7️⃣",
+  "8️⃣",
+  "9️⃣",
+  "🔟",
+];
+
 cmd(
   {
     pattern: "menu",
-    desc: "Dynamic Command Menu",
+    react: "📂",
+    desc: "Show all command categories",
     category: "main",
-    react: "📜",
     filename: __filename,
   },
-  async (conn, mek, m, { from, pushname, reply }) => {
+  async (conn, mek, m, { from, sender }) => {
     try {
+      const commandMap = {};
 
-      // AUTO CATEGORY CREATE
-      let categories = {};
+      for (const command of commands) {
+        if (command.dontAddCommandList) continue;
 
-      for (let command of commands) {
-        if (!command.category) continue;
+        const category = (command.category || "misc").toUpperCase();
 
-        if (!categories[command.category]) {
-          categories[command.category] = [];
+        if (!commandMap[category]) {
+          commandMap[category] = [];
         }
 
-        categories[command.category].push(command.pattern);
+        commandMap[category].push(command);
       }
 
-      // MAIN MENU
-      let menuText = `
-╭━━━〔 *SITHIJA-MD* 〕━━━⬣
-┃ 👤 User : ${pushname}
-┃ ⚡ Status : Online
-┃ 📦 Plugins : ${commands.length}
-╰━━━━━━━━━━━━━━⬣
+      const categories = Object.keys(commandMap);
 
-╭━━〔 *MENU LIST* 〕━━⬣
+      let menuText = `
+╭━━━〔 *SITHIJA-MD MENU* 〕━━━⬣
+┃
+┃ ✦ *Hello User 👋*
+┃ ✦ *Select A Category Number*
+┃
+┣━━━━━━━━━━━━━━━⬣
 `;
 
-      let categoryNames = Object.keys(categories);
-
-      categoryNames.forEach((cat, index) => {
-        menuText += `┃➤ ${index + 1}. ${cat.toUpperCase()} MENU\n`;
+      categories.forEach((cat, index) => {
+        menuText += `┃ ${numberEmoji[index] || "🔹"} ${cat} COMMANDS\n`;
       });
 
-      menuText += `╰━━━━━━━━━━━━━━⬣\n\n`;
-      menuText += `> Reply Number Below 👇\n`;
+      menuText += `┣━━━━━━━━━━━━━━━⬣
+┃ 🤖 *Bot Name:* SITHIJA-MD
+┃ 📦 *Categories:* ${categories.length}
+┃ ⚡ *Version:* 1.0.0
+╰━━━━━━━━━━━━━━━⬣`;
 
-      categoryNames.forEach((cat, index) => {
-        menuText += `> ${index + 1}️⃣ ${cat.toUpperCase()} MENU\n`;
-      });
-
-      // SEND MENU
-      const sentMsg = await conn.sendMessage(
+      await conn.sendMessage(
         from,
         {
-          image: {
-            url: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/ChatGPT%20Image%20May%2016,%202026,%2009_18_56%20PM.png?raw=true",
-          },
+          image: { url: headerImage },
           caption: menuText,
         },
         { quoted: mek }
       );
 
-      // REPLY DETECT
-      conn.ev.on("messages.upsert", async ({ messages }) => {
-        const msg = messages[0];
-        if (!msg.message) return;
-
-        const text =
-          msg.message.conversation ||
-          msg.message.extendedTextMessage?.text;
-
-        const replyId =
-          msg.message?.extendedTextMessage?.contextInfo?.stanzaId;
-
-        // CHECK REPLY
-        if (
-          msg.key.remoteJid === from &&
-          replyId === sentMsg.key.id
-        ) {
-
-          let number = parseInt(text);
-
-          if (
-            !isNaN(number) &&
-            number > 0 &&
-            number <= categoryNames.length
-          ) {
-
-            let category = categoryNames[number - 1];
-            let cmds = categories[category];
-
-            let replyText = `
-╭━━〔 *${category.toUpperCase()} MENU* 〕━━⬣
-`;
-
-            cmds.forEach((cmdName) => {
-              replyText += `┃➤ .${cmdName}\n`;
-            });
-
-            replyText += `╰━━━━━━━━━━━━━━⬣`;
-
-            await conn.sendMessage(
-              from,
-              {
-                text: replyText,
-              },
-              { quoted: msg }
-            );
-          }
-        }
-      });
-
+      pendingMenu[sender] = {
+        step: "category",
+        commandMap,
+        categories,
+      };
     } catch (e) {
       console.log(e);
-      reply(`Error: ${e}`);
+    }
+  }
+);
+
+cmd(
+  {
+    on: "text",
+  },
+  async (conn, mek, m, { from, body, sender, reply }) => {
+    try {
+      if (!pendingMenu[sender]) return;
+
+      if (pendingMenu[sender].step !== "category") return;
+
+      if (!/^[1-9]|10$/.test(body.trim())) return;
+
+      const data = pendingMenu[sender];
+
+      const selected = parseInt(body.trim()) - 1;
+
+      if (
+        selected < 0 ||
+        selected >= data.categories.length
+      ) {
+        return reply("❌ Invalid Number");
+      }
+
+      const category = data.categories[selected];
+      const cmds = data.commandMap[category];
+
+      let text = `
+╭━━━〔 *${category} MENU* 〕━━━⬣
+┃
+`;
+
+      cmds.forEach((cmd, i) => {
+        const aliases = cmd.alias
+          ? ` (${cmd.alias.join(", ")})`
+          : "";
+
+        text += `┃ ${i + 1}. .${cmd.pattern}${aliases}
+┃ ✦ ${cmd.desc || "No Description"}
+┃
+`;
+      });
+
+      text += `┣━━━━━━━━━━━━━━━⬣
+┃ 📦 *Total Commands:* ${cmds.length}
+╰━━━━━━━━━━━━━━━⬣`;
+
+      await conn.sendMessage(
+        from,
+        {
+          image: { url: headerImage },
+          caption: text,
+        },
+        { quoted: mek }
+      );
+
+      delete pendingMenu[sender];
+    } catch (e) {
+      console.log(e);
     }
   }
 );

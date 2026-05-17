@@ -1,75 +1,75 @@
-const { cmd } = require("../command");
+const { cmd, commands } = require('../command');
+const config = require('../config');
 const os = require("os");
-const moment = require("moment");
 
-cmd(
-{
+cmd({
     pattern: "alive",
-    desc: "Check bot online status",
+    desc: "Check bot online or no.",
     category: "main",
     react: "🟢",
     filename: __filename
 },
-async (conn, mek, m, { from, reply }) => {
+async (danuwa, mek, m, {
+    from, pushname, reply
+}) => {
+    try {
 
-try {
+        const uptime = process.uptime();
 
-const uptime = process.uptime();
+        function runtime(seconds) {
+            seconds = Number(seconds);
 
-function runtime(seconds) {
-seconds = Number(seconds);
-const d = Math.floor(seconds / (3600 * 24));
-const h = Math.floor(seconds % (3600 * 24) / 3600);
-const m = Math.floor(seconds % 3600 / 60);
-const s = Math.floor(seconds % 60);
+            const d = Math.floor(seconds / (3600 * 24));
+            const h = Math.floor(seconds % (3600 * 24) / 3600);
+            const m = Math.floor(seconds % 3600 / 60);
+            const s = Math.floor(seconds % 60);
 
-const dDisplay = d > 0 ? d + "d " : "";
-const hDisplay = h > 0 ? h + "h " : "";
-const mDisplay = m > 0 ? m + "m " : "";
-const sDisplay = s > 0 ? s + "s" : "";
-return dDisplay + hDisplay + mDisplay + sDisplay;
-}
+            const dDisplay = d > 0 ? d + " Day, " : "";
+            const hDisplay = h > 0 ? h + " Hour, " : "";
+            const mDisplay = m > 0 ? m + " Minute, " : "";
+            const sDisplay = s > 0 ? s + " Second" : "";
 
-const aliveMsg = `
-╭━━〔 *SITHIJA-MD* 〕━━⬣
-┃ ✋ HI, *I AM ALIVE NOW*
+            return dDisplay + hDisplay + mDisplay + sDisplay;
+        }
+
+        const aliveMsg = `
+╭━━━〔 *SITHIJA-MD* 〕━━━⬣
+┃ ✋ HI, *${pushname}* I'M ALIVE NOW 🤖
 ┃
-┣━━〔 📅 DATE INFO 〕━━⬣
-┃ 📆 Date : ${moment().format("DD/MM/YYYY")}
-┃ ⏰ Time : ${moment().format("HH:mm:ss")}
+┣━━━〔 📅 DATE INFORMATION 〕━━⬣
+┃ 📆 Date : ${new Date().toLocaleDateString()}
+┃ ⏰ Time : ${new Date().toLocaleTimeString()}
 ┃
-┣━━〔 ⚙️ STATUS INFO 〕━━⬣
-┃ 👤 Owner : Sithija
-┃ 🔖 Prefix : .
-┃ 🧬 Version : v1.0.0
+┣━━━〔 ⚙️ STATUS DETAILS 〕━━⬣
+┃ 👤 User : ${pushname}
+┃ 🔖 Prefix : ${config.PREFIX}
+┃ 🧬 Version : 1.0.0
 ┃ 💻 Platform : ${os.platform()}
-┃ 🛰️ Host : VPS/Cloud
+┃ 🛰️ Host : VPS / Cloud
 ┃ ⏳ Uptime : ${runtime(uptime)}
 ┃ 📁 RAM : ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
 ┃
-┣━━〔 📜 MAIN COMMANDS 〕━━⬣
+┣━━━〔 📜 MAIN COMMANDS 〕━━⬣
 ┃ 💎 .menu
 ┃ 💎 .alive
 ┃ 💎 .ping
 ┃ 💎 .owner
 ┃
-╰━━━━━━━━━━━━━━⬣
+╰━━━━━━━━━━━━━━━━━━⬣
 > POWERED BY SITHIJA-MD
 `;
 
-await conn.sendMessage(
-from,
-{
-image: {
-url: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/alive.png1.png?raw=true"
-},
-caption: aliveMsg
-},
-{ quoted: mek }
-);
+        return await danuwa.sendMessage(
+            from,
+            {
+                image: { url: config.ALIVE_IMG },
+                caption: aliveMsg
+            },
+            { quoted: mek }
+        );
 
-} catch (e) {
-console.log(e);
-reply(`${e}`);
-}
+    } catch (e) {
+        console.log(e);
+        reply(`${e}`);
+    }
 });

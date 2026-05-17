@@ -6,7 +6,7 @@ cmd({
     pattern: "alive",
     desc: "Check bot online or no.",
     category: "main",
-    react: "🟢",
+    react: "👑",
     filename: __filename
 },
 async (danuwa, mek, m, {
@@ -38,7 +38,7 @@ async (danuwa, mek, m, {
 ┃
 ┣━━━〔 📅 DATE INFORMATION 〕━━⬣
 ┃ 📆 Date : ${new Date().toLocaleDateString()}
-┃ ⏰ Time : ${new Date().toLocaleTimeString()}
+┃ 
 ┃
 ┣━━━〔 ⚙️ STATUS DETAILS 〕━━⬣
 ┃ 👤 User : ${pushname}

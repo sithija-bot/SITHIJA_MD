@@ -89,7 +89,7 @@ async function connectToWA() {
 
       const up = `SITHIJA-MD connected ✅\n\nPREFIX: ${prefix}`;
       await danuwa.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/ChatGPT%20Image%20May%2016,%202026,%2009_18_56%20PM.png?raw=true` },
+        image: { url: `https://github.com/sithija-bot/SITHIJA_MD/blob/main/alive.png1.png?raw=true` },
         caption: up
       });
 

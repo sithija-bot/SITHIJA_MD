@@ -3,7 +3,7 @@ const { cmd, commands } = require("../command");
 cmd(
   {
     pattern: "menu",
-    desc: "Show all commands",
+    desc: "Dynamic Command Menu",
     category: "main",
     react: "📜",
     filename: __filename,
@@ -11,120 +11,94 @@ cmd(
   async (conn, mek, m, { from, pushname, reply }) => {
     try {
 
-      const menu = `
+      // AUTO CATEGORY CREATE
+      let categories = {};
+
+      for (let command of commands) {
+        if (!command.category) continue;
+
+        if (!categories[command.category]) {
+          categories[command.category] = [];
+        }
+
+        categories[command.category].push(command.pattern);
+      }
+
+      // MAIN MENU
+      let menuText = `
 ╭━━━〔 *SITHIJA-MD* 〕━━━⬣
 ┃ 👤 User : ${pushname}
-┃ ♦ Version : 1.0
 ┃ ⚡ Status : Online
+┃ 📦 Plugins : ${commands.length}
 ╰━━━━━━━━━━━━━━⬣
 
 ╭━━〔 *MENU LIST* 〕━━⬣
-┃➤ Main Menu
-┃➤ Download Menu
-┃➤ Group Menu
-┃➤ Owner Menu
-┃➤ Fun Menu
-╰━━━━━━━━━━━━━━⬣
-
-> Reply Number Below 👇
-> 1️⃣ Main Menu
-> 2️⃣ Download Menu
-> 3️⃣ Group Menu
-> 4️⃣ Owner Menu
-> 5️⃣ Fun Menu
 `;
 
+      let categoryNames = Object.keys(categories);
+
+      categoryNames.forEach((cat, index) => {
+        menuText += `┃➤ ${index + 1}. ${cat.toUpperCase()} MENU\n`;
+      });
+
+      menuText += `╰━━━━━━━━━━━━━━⬣\n\n`;
+      menuText += `> Reply Number Below 👇\n`;
+
+      categoryNames.forEach((cat, index) => {
+        menuText += `> ${index + 1}️⃣ ${cat.toUpperCase()} MENU\n`;
+      });
+
+      // SEND MENU
       const sentMsg = await conn.sendMessage(
         from,
         {
           image: {
-            url: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/ChatGPT%20Image%20May%2016,%202026,%2009_18_56%20PM.png?raw=true",
+            url: "https://files.catbox.moe/7mcy8w.jpg",
           },
-          caption: menu,
+          caption: menuText,
         },
         { quoted: mek }
       );
 
+      // REPLY DETECT
       conn.ev.on("messages.upsert", async ({ messages }) => {
         const msg = messages[0];
-
         if (!msg.message) return;
 
         const text =
           msg.message.conversation ||
           msg.message.extendedTextMessage?.text;
 
+        const replyId =
+          msg.message?.extendedTextMessage?.contextInfo?.stanzaId;
+
+        // CHECK REPLY
         if (
           msg.key.remoteJid === from &&
-          msg.message?.extendedTextMessage?.contextInfo?.stanzaId ===
-            sentMsg.key.id
+          replyId === sentMsg.key.id
         ) {
 
-          let replyText = "";
+          let number = parseInt(text);
 
-          if (text === "1") {
-            replyText = `
-╭━━〔 *MAIN MENU* 〕━━⬣
-┃➤ .menu
-┃➤ .alive
-┃➤ .ping
-┃➤ .runtime
-┃➤ .system
-╰━━━━━━━━━━━━━━⬣
+          if (
+            !isNaN(number) &&
+            number > 0 &&
+            number <= categoryNames.length
+          ) {
+
+            let category = categoryNames[number - 1];
+            let cmds = categories[category];
+
+            let replyText = `
+╭━━〔 *${category.toUpperCase()} MENU* 〕━━⬣
 `;
-          }
 
-          else if (text === "2") {
-            replyText = `
-╭━━〔 *DOWNLOAD MENU* 〕━━⬣
-┃➤ .song
-┃➤ .video
-┃➤ .ytmp3
-┃➤ .ytmp4
-┃➤ .tiktok
-┃➤ .facebook
-╰━━━━━━━━━━━━━━⬣
-`;
-          }
+            cmds.forEach((cmdName) => {
+              replyText += `┃➤ .${cmdName}\n`;
+            });
 
-          else if (text === "3") {
-            replyText = `
-╭━━〔 *GROUP MENU* 〕━━⬣
-┃➤ .tagall
-┃➤ .hidetag
-┃➤ .kick
-┃➤ .add
-┃➤ .promote
-┃➤ .demote
-╰━━━━━━━━━━━━━━⬣
-`;
-          }
+            replyText += `╰━━━━━━━━━━━━━━⬣`;
 
-          else if (text === "4") {
-            replyText = `
-╭━━〔 *OWNER MENU* 〕━━⬣
-┃➤ .restart
-┃➤ .shutdown
-┃➤ .block
-┃➤ .unblock
-┃➤ .setpp
-╰━━━━━━━━━━━━━━⬣
-`;
-          }
-
-          else if (text === "5") {
-            replyText = `
-╭━━〔 *FUN MENU* 〕━━⬣
-┃➤ .joke
-┃➤ .quote
-┃➤ .fact
-┃➤ .truth
-┃➤ .dare
-╰━━━━━━━━━━━━━━⬣
-`;
-          }
-
-          if (replyText !== "") {
             await conn.sendMessage(
               from,
               {

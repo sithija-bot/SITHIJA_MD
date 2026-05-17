@@ -1,61 +1,100 @@
-const { cmd } = require("../command");
+const { cmd, commands } = require("../command");
 
-cmd({
+cmd(
+  {
     pattern: "menu",
-    desc: "Bot menu",
+    desc: "Show all commands",
     category: "main",
-    filename: __filename
-},
-async (danuwa, mek, m, { from, pushname, reply }) => {
-
-try {
-
-const menuText = `
-╭━━〔 🤖 SITHIJA MD 🤖 〕━━⬣
-┃ 👋 Hello ${pushname}
-┃ ⚡ Bot Status : Online
+    react: "📜",
+    filename: __filename,
+  },
+  async (conn, mek, m, { from, pushname, reply }) => {
+    try {
+      let menu = `
+╭━━━〔 *SITHIJA-MD* 〕━━━⬣
+┃
+┃ 👤 *User :* ${pushname}
+┃ ⏰ *Time :* ${new Date().toLocaleTimeString()}
+┃ 📅 *Date :* ${new Date().toLocaleDateString()}
+┃ 🤖 *Mode :* Public
+┃
 ╰━━━━━━━━━━━━━━⬣
 
-📌 Select Menu Category
+╭━━〔 *MAIN COMMANDS* 〕━━⬣
+┃➤ .menu
+┃➤ .alive
+┃➤ .ping
+┃➤ .system
+┃➤ .runtime
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 *DOWNLOAD COMMANDS* 〕━━⬣
+┃➤ .song
+┃➤ .video
+┃➤ .ytmp3
+┃➤ .ytmp4
+┃➤ .tiktok
+┃➤ .facebook
+┃➤ .mediafire
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 *GROUP COMMANDS* 〕━━⬣
+┃➤ .tagall
+┃➤ .hidetag
+┃➤ .kick
+┃➤ .add
+┃➤ .promote
+┃➤ .demote
+┃➤ .mute
+┃➤ .unmute
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 *OWNER COMMANDS* 〕━━⬣
+┃➤ .restart
+┃➤ .shutdown
+┃➤ .block
+┃➤ .unblock
+┃➤ .setpp
+┃➤ .setname
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 *FUN COMMANDS* 〕━━⬣
+┃➤ .joke
+┃➤ .quote
+┃➤ .fact
+┃➤ .truth
+┃➤ .dare
+╰━━━━━━━━━━━━━━⬣
+
+> © Powered By SITHIJA-MD
 `;
 
-const buttonMessage = {
-    image: { url: "https://files.catbox.moe/8tqwa6.jpg" },
-    caption: menuText,
-    footer: "Powered By Sithija",
-    buttons: [
+      await conn.sendMessage(
+        from,
         {
-            buttonId: ".downloadmenu",
-            buttonText: {
-                displayText: "📥 DOWNLOAD"
+          image: {
+            url: "https://files.catbox.moe/7mcy8w.jpg",
+          },
+          caption: menu,
+          contextInfo: {
+            forwardingScore: 999,
+            isForwarded: true,
+            externalAdReply: {
+              title: "SITHIJA-MD WHATSAPP BOT",
+              body: "Fast & Powerful Multi Device Bot",
+              thumbnailUrl:
+                "https://files.catbox.moe/7mcy8w.jpg",
+              sourceUrl: "https://github.com/",
+              mediaType: 1,
+              renderLargerThumbnail: true,
             },
-            type: 1
+          },
         },
-        {
-            buttonId: ".groupmenu",
-            buttonText: {
-                displayText: "👥 GROUP"
-            },
-            type: 1
-        },
-        {
-            buttonId: ".owner",
-            buttonText: {
-                displayText: "👑 OWNER"
-            },
-            type: 1
-        }
-    ],
-    headerType: 4
-};
-
-await danuwa.sendMessage(from, buttonMessage, {
-    quoted: mek
-});
-
-} catch(e) {
-console.log(e);
-reply("❌ Error generating menu.");
-}
-
-});
+        { quoted: mek }
+      );
+    } catch (e) {
+      console.log(e);
+      reply(`Error: ${e}`);
+    }
+  }
+);

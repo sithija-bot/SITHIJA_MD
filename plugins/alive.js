@@ -36,10 +36,10 @@ async (danuwa, mek, m, {
 ╭━━━〔 *SITHIJA-MD* 〕━━━⬣
 ┃ ✋ HI, *${pushname}* I'M ALIVE NOW 👑
 ┃
-┣━━━〔 📅 DATE INFORMATION 〕━━⬣
+ ┣━━━〔 📅 DATE INFORMATION 〕━━⬣
 ┃ 📆 Date : ${new Date().toLocaleDateString()}
 ┃
-┣━━━〔 ⚙️ STATUS DETAILS 〕━━⬣
+ ┣━━━〔 ⚙️ STATUS DETAILS 〕━━⬣
 ┃ 👤 User : ${pushname}
 ┃ 🔖 Prefix : ${config.PREFIX}
 ┃ 🧬 Version : 1.0.0
@@ -48,7 +48,7 @@ async (danuwa, mek, m, {
 ┃ ⏳ Uptime : ${runtime(uptime)}
 ┃ 📁 RAM : ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
 ┃
-┣━━━〔 📜 MAIN COMMANDS 〕━━⬣
+ ┣━━━〔 📜 MAIN COMMANDS 〕━━⬣
 ┃ 💎 .menu
 ┃ 💎 .alive
 ┃ 💎 .ping

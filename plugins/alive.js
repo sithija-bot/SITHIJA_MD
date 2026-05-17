@@ -34,7 +34,7 @@ async (danuwa, mek, m, {
 
         const aliveMsg = `
 ╭━━━〔 *SITHIJA-MD* 〕━━━⬣
-┃ ✋ HI, *${pushname}* I'M ALIVE NOW 🤖
+┃ ✋ HI, *${pushname}* I'M ALIVE NOW 👑
 ┃
 ┣━━━〔 📅 DATE INFORMATION 〕━━⬣
 ┃ 📆 Date : ${new Date().toLocaleDateString()}
@@ -45,7 +45,7 @@ async (danuwa, mek, m, {
 ┃ 🔖 Prefix : ${config.PREFIX}
 ┃ 🧬 Version : 1.0.0
 ┃ 💻 Platform : ${os.platform()}
-┃ 🛰️ Host : VPS / Cloud
+┃ 🛰️ Host : Railway
 ┃ ⏳ Uptime : ${runtime(uptime)}
 ┃ 📁 RAM : ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
 ┃

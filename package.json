@@ -31,6 +31,8 @@
     "qrcode-terminal": "latest",
     "tmp": "latest",
     "util": "latest",
-    "vm": "latest"
+    "vm": "latest",
+    "sadaslk-dlcore": "latest",
+    "yt-search": "latest"
   }
 }

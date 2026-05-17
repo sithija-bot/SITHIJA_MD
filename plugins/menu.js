@@ -10,88 +10,132 @@ cmd(
   },
   async (conn, mek, m, { from, pushname, reply }) => {
     try {
-      let menu = `
+
+      const menu = `
 ╭━━━〔 *SITHIJA-MD* 〕━━━⬣
-┃
-┃ 👤 *User :* ${pushname}
-┃ ⏰ *Time :* ${new Date().toLocaleTimeString()}
-┃ 📅 *Date :* ${new Date().toLocaleDateString()}
-┃ 🤖 *Mode :* Public
-┃
+┃ 👤 User : ${pushname}
+┃ ♦ Version : 1.0
+┃ ⚡ Status : Online
 ╰━━━━━━━━━━━━━━⬣
 
-╭━━〔 *MAIN COMMANDS* 〕━━⬣
+╭━━〔 *MENU LIST* 〕━━⬣
+┃➤ Main Menu
+┃➤ Download Menu
+┃➤ Group Menu
+┃➤ Owner Menu
+┃➤ Fun Menu
+╰━━━━━━━━━━━━━━⬣
+
+> Reply Number Below 👇
+> 1️⃣ Main Menu
+> 2️⃣ Download Menu
+> 3️⃣ Group Menu
+> 4️⃣ Owner Menu
+> 5️⃣ Fun Menu
+`;
+
+      const sentMsg = await conn.sendMessage(
+        from,
+        {
+          image: {
+            url: "https://files.catbox.moe/7mcy8w.jpg",
+          },
+          caption: menu,
+        },
+        { quoted: mek }
+      );
+
+      conn.ev.on("messages.upsert", async ({ messages }) => {
+        const msg = messages[0];
+
+        if (!msg.message) return;
+
+        const text =
+          msg.message.conversation ||
+          msg.message.extendedTextMessage?.text;
+
+        if (
+          msg.key.remoteJid === from &&
+          msg.message?.extendedTextMessage?.contextInfo?.stanzaId ===
+            sentMsg.key.id
+        ) {
+
+          let replyText = "";
+
+          if (text === "1") {
+            replyText = `
+╭━━〔 *MAIN MENU* 〕━━⬣
 ┃➤ .menu
 ┃➤ .alive
 ┃➤ .ping
-┃➤ .system
 ┃➤ .runtime
+┃➤ .system
 ╰━━━━━━━━━━━━━━⬣
+`;
+          }
 
-╭━━〔 *DOWNLOAD COMMANDS* 〕━━⬣
+          else if (text === "2") {
+            replyText = `
+╭━━〔 *DOWNLOAD MENU* 〕━━⬣
 ┃➤ .song
 ┃➤ .video
 ┃➤ .ytmp3
 ┃➤ .ytmp4
 ┃➤ .tiktok
 ┃➤ .facebook
-┃➤ .mediafire
 ╰━━━━━━━━━━━━━━⬣
+`;
+          }
 
-╭━━〔 *GROUP COMMANDS* 〕━━⬣
+          else if (text === "3") {
+            replyText = `
+╭━━〔 *GROUP MENU* 〕━━⬣
 ┃➤ .tagall
 ┃➤ .hidetag
 ┃➤ .kick
 ┃➤ .add
 ┃➤ .promote
 ┃➤ .demote
-┃➤ .mute
-┃➤ .unmute
 ╰━━━━━━━━━━━━━━⬣
+`;
+          }
 
-╭━━〔 *OWNER COMMANDS* 〕━━⬣
+          else if (text === "4") {
+            replyText = `
+╭━━〔 *OWNER MENU* 〕━━⬣
 ┃➤ .restart
 ┃➤ .shutdown
 ┃➤ .block
 ┃➤ .unblock
 ┃➤ .setpp
-┃➤ .setname
 ╰━━━━━━━━━━━━━━⬣
+`;
+          }
 
-╭━━〔 *FUN COMMANDS* 〕━━⬣
+          else if (text === "5") {
+            replyText = `
+╭━━〔 *FUN MENU* 〕━━⬣
 ┃➤ .joke
 ┃➤ .quote
 ┃➤ .fact
 ┃➤ .truth
 ┃➤ .dare
 ╰━━━━━━━━━━━━━━⬣
-
-> © Powered By SITHIJA-MD
 `;
+          }
 
-      await conn.sendMessage(
-        from,
-        {
-          image: {
-            url: "https://github.com/sithija-bot/SITHIJA_MD/blob/main/ChatGPT%20Image%20May%2016,%202026,%2009_18_56%20PM.png?raw=true",
-          },
-          caption: menu,
-          contextInfo: {
-            forwardingScore: 999,
-            isForwarded: true,
-            externalAdReply: {
-              title: "SITHIJA-MD WHATSAPP BOT",
-              body: "Fast & Powerful Multi Device Bot",
-              thumbnailUrl:
-                "https://github.com/sithija-bot/SITHIJA_MD/blob/main/ChatGPT%20Image%20May%2016,%202026,%2009_18_56%20PM.png?raw=true",
-              sourceUrl: "https://github.com/",
-              mediaType: 1,
-              renderLargerThumbnail: true,
-            },
-          },
-        },
-        { quoted: mek }
-      );
+          if (replyText !== "") {
+            await conn.sendMessage(
+              from,
+              {
+                text: replyText,
+              },
+              { quoted: msg }
+            );
+          }
+        }
+      });
+
     } catch (e) {
       console.log(e);
       reply(`Error: ${e}`);

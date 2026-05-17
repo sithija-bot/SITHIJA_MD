@@ -13,32 +13,44 @@ cmd(
     m,
     {
       from,
+      pushname,
       reply
     }
   ) => {
     try {
-      const categories = {};
 
-      for (let cmdName in commands) {
-        const cmdData = commands[cmdName];
-        const cat = cmdData.category?.toLowerCase() || "other";
-        if (!categories[cat]) categories[cat] = [];
-        categories[cat].push({
-          pattern: cmdData.pattern,
-          desc: cmdData.desc || "No description"
-        });
-      }
+      const menuText = `
+╭━━〔 🤖 SITHIJA MD 🤖 〕━━⬣
+┃ 👋 Hello ${pushname}
+┃ ⚡ Bot Status : Online
+╰━━━━━━━━━━━━━━⬣
 
-      let menuText = "📋 *Available Commands:*\n";
+📌 Select Menu Category Below
+`;
 
-      for (const [cat, cmds] of Object.entries(categories)) {
-        menuText += `\n📂 *${cat.toUpperCase()}*\n`;
-        cmds.forEach(c => {
-          menuText += `- .${c.pattern} : ${c.desc}\n`;
-        });
-      }
+      await danuwa.sendMessage(from, {
+        text: menuText,
+        footer: "Powered By Sithija",
+        buttons: [
+          {
+            buttonId: ".downloadmenu",
+            buttonText: { displayText: "📥 DOWNLOAD" },
+            type: 1
+          },
+          {
+            buttonId: ".groupmenu",
+            buttonText: { displayText: "👥 GROUP" },
+            type: 1
+          },
+          {
+            buttonId: ".ownermenu",
+            buttonText: { displayText: "👑 OWNER" },
+            type: 1
+          }
+        ],
+        headerType: 1
+      }, { quoted: mek });
 
-      await reply(menuText.trim());
     } catch (err) {
       console.error(err);
       reply("❌ Error generating menu.");

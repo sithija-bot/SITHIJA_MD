@@ -1,65 +1,61 @@
-const { cmd, commands } = require("../command");
+const { cmd } = require("../command");
 
-cmd(
-  {
+cmd({
     pattern: "menu",
-    desc: "Displays all available commands",
+    desc: "Bot menu",
     category: "main",
-    filename: __filename,
-  },
-  async (
-    danuwa,
-    mek,
-    m,
-    {
-      from,
-      pushname,
-      reply
-    }
-  ) => {
-    try {
+    filename: __filename
+},
+async (danuwa, mek, m, { from, pushname, reply }) => {
 
-      const menuText = `
+try {
+
+const menuText = `
 ╭━━〔 🤖 SITHIJA MD 🤖 〕━━⬣
 ┃ 👋 Hello ${pushname}
 ┃ ⚡ Bot Status : Online
 ╰━━━━━━━━━━━━━━⬣
 
-📌 Select Menu Category Below
+📌 Select Menu Category
 `;
 
-    await danuwa.sendMessage(from, {
+const buttonMessage = {
     image: { url: "https://files.catbox.moe/8tqwa6.jpg" },
     caption: menuText,
     footer: "Powered By Sithija",
-    templateButtons: [
+    buttons: [
         {
-            index: 1,
-            quickReplyButton: {
-                displayText: "📥 DOWNLOAD",
-                id: ".downloadmenu"
-            }
+            buttonId: ".downloadmenu",
+            buttonText: {
+                displayText: "📥 DOWNLOAD"
+            },
+            type: 1
         },
         {
-            index: 2,
-            quickReplyButton: {
-                displayText: "👥 GROUP",
-                id: ".groupmenu"
-            }
+            buttonId: ".groupmenu",
+            buttonText: {
+                displayText: "👥 GROUP"
+            },
+            type: 1
         },
         {
-            index: 3,
-            quickReplyButton: {
-                displayText: "👑 OWNER",
-                id: ".owner"
-            }
+            buttonId: ".owner",
+            buttonText: {
+                displayText: "👑 OWNER"
+            },
+            type: 1
         }
-    ]
-}, { quoted: mek });
-      
-    } catch (err) {
-      console.error(err);
-      reply("❌ Error generating menu.");
-    }
-  }
-);
+    ],
+    headerType: 4
+};
+
+await danuwa.sendMessage(from, buttonMessage, {
+    quoted: mek
+});
+
+} catch(e) {
+console.log(e);
+reply("❌ Error generating menu.");
+}
+
+});

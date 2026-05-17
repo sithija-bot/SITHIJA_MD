@@ -6,8 +6,8 @@ function convertToBool(text, fault = 'true') {
 }
 module.exports = {
 SESSION_ID: process.env.SESSION_ID || "lAcWFR7Y#Fn2cGZfcIjsU6QfTopeXeUMHxkUii64J-wOoTki10wc",
-ALIVE_IMG: process.env.ALIVE_IMG || "https://github.com/sithija-bot/SITHIJA_MD/blob/main/ChatGPT%20Image%20May%2016,%202026,%2009_18_56%20PM.png?raw=true",
-ALIVE_MSG: process.env.ALIVE_MSG || "*⚡ SITHIJA MD Alive..❤️ Fast & Active Always*",
+ALIVE_IMG: process.env.ALIVE_IMG || "https://github.com/sithija-bot/SITHIJA_MD/blob/main/alive.png1.png?raw=true",
+ALIVE_MSG: process.env.ALIVE_MSG || "*⚡ SITHIJA MD Alive❤️ Fast & Active Always*",
 BOT_OWNER: '94785936039',  // Replace with the owner's phone number
 
 

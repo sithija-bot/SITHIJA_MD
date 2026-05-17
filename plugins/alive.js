@@ -38,7 +38,6 @@ async (danuwa, mek, m, {
 ┃
 ┣━━━〔 📅 DATE INFORMATION 〕━━⬣
 ┃ 📆 Date : ${new Date().toLocaleDateString()}
-┃ 
 ┃
 ┣━━━〔 ⚙️ STATUS DETAILS 〕━━⬣
 ┃ 👤 User : ${pushname}

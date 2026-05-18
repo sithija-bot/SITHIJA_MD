@@ -33,6 +33,7 @@
     "util": "latest",
     "vm": "latest",
     "sadaslk-dlcore": "latest",
-    "yt-search": "latest"
+    "yt-search": "latest",
+    "@xaviabot/fb-downloader": "latest"
   }
 }

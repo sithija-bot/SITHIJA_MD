@@ -23,7 +23,7 @@ cmd(
     pattern: "ytmp3",
     alias: ["yta", "song"],
     desc: "Download YouTube MP3 by name or link",
-    category: "download",
+    category: "main",
     filename: __filename,
   },
   async (bot, mek, m, { from, q, reply }) => {
@@ -75,7 +75,7 @@ cmd(
     pattern: "ytmp4",
     alias: ["ytv", "video"],
     desc: "Download YouTube MP4 by name or link",
-    category: "download",
+    category: "main",
     filename: __filename,
   },
   async (bot, mek, m, { from, q, reply }) => {
@@ -136,7 +136,7 @@ cmd(
     pattern: "tiktok",
     alias: ["tt"],
     desc: "Download TikTok video",
-    category: "download",
+    category: "main",
     filename: __filename,
   },
   async (bot, mek, m, { from, q, reply }) => {

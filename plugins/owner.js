@@ -22,7 +22,7 @@ displayName: "BOT OWNER:-MR.Sithija Anuhas 👑 ",
 contacts: [{
 vcard: `BEGIN:VCARD
 VERSION:3.0
-FN:SITHIJA OWNER
+FN:BOT OWNER:-MR.Sithija Anuhas 👑
 TEL;type=CELL;type=VOICE;waid=94785936039:+94785936039
 END:VCARD`
 }]

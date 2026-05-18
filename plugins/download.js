@@ -23,7 +23,7 @@ cmd(
     pattern: "ytmp3",
     alias: ["yta", "song"],
     desc: "Download YouTube MP3 by name or link",
-    category: "main",
+    category: "download",
     filename: __filename,
   },
   async (bot, mek, m, { from, q, reply }) => {

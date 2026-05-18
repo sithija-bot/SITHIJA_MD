@@ -113,7 +113,7 @@ cmd({
   alias: ["sinhalasub","films","cinema"],
   react: "🎬",
   desc: "Search and send movies from Sinhalasub.lk",
-  category: "download",
+  category: "movie",
   filename: __filename
 }, async (danuwa, mek, m, { from, q, sender, reply }) => {
   if (!q) return reply(`*🎬 Movie Search Plugin*\nUsage: movie_name\nExample: movie avengers`);

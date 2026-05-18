@@ -18,7 +18,7 @@ await danuwa.sendMessage(
 from,
 {
 contacts: {
-displayName: "SITHIJA OWNER",
+displayName: "BOT OWNER:-MR.Sithija Anuhas 👑 ",
 contacts: [{
 vcard: `BEGIN:VCARD
 VERSION:3.0

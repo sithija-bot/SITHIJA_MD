@@ -4,59 +4,64 @@ const os = require("os");
 
 cmd({
     pattern: "alive",
-    desc: "Check bot online status",
+    desc: "Bot Status",
     category: "main",
-    react: "⚡",
+    react: "🧬",
     filename: __filename
 },
 async (conn, mek, m, {
     from,
-    pushname,
     reply
 }) => {
+
     try {
 
         const uptime = process.uptime();
-        const ramUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
-        const totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
-        const usedRam = (os.freemem() / 1024 / 1024 / 1024).toFixed(2);
+        const ping = Date.now() - mek.messageTimestamp * 1000;
+        const ram = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
 
-        const aliveText = `
-╭━━━〔 *🌿 SITHIJA-MD 🌿* 〕━━━⬣
-┃ ⚡ *SYSTEM ONLINE*
-┃ 🧬 *BOT STATUS ACTIVE*
-╰━━━━━━━━━━━━━━━⬣
+        const alive = `
+🎋┃ *S I T H I J A - M D* | v1.0 🎋┃
 
-╭━━〔 *📊 SYSTEM STATS* 〕━━⬣
-┃ 🟢 *STATUS* : ONLINE
-┃ ⚙️ *VERSION* : 1.0.0
-┃ 🛡️ *MODE* : PUBLIC
-┃ 🚀 *UPTIME* : ${runtime(uptime)}
-┃ 📶 *PING* : ${Date.now() - mek.messageTimestamp * 1000}ms
-╰━━━━━━━━━━━━━━━⬣
+🌿 👋 *SYSTEM ONLINE! YOUR BOT*
+*IS RUNNING PERFECTLY*
 
-╭━━〔 *👑 OWNER INFO* 〕━━⬣
-┃ 👤 *OWNER* : SITHIJA
-┃ 🌐 *LIBRARY* : BAILEYS
-┃ 📍 *LOCATION* : SRI LANKA
-┃ 💻 *NODE JS* : ${process.version}
-╰━━━━━━━━━━━━━━━⬣
+╭───────────────❍
+│ *S Y S T E M  S T A T S*
+│
+│ 📗 *STATUS* : ONLINE
+│ 💻 *VERSION* : 1.0.0
+│ 🛡️ *MODE* : PUBLIC
+│ ⚡ *LATENCY* : ${ping}ms
+│ ⏳ *UPTIME* : ${runtime(uptime)}
+╰───────────────❍
 
-╭━━〔 *🖥️ SERVER INFO* 〕━━⬣
-┃ 🍀 *RAM USED* : ${ramUsage} MB
-┃ 💾 *TOTAL RAM* : ${totalRam} GB
-┃ 🔋 *FREE RAM* : ${usedRam} GB
-╰━━━━━━━━━━━━━━━⬣
+╭───────────────❍
+│ *O W N E R  C O N T E X T*
+│
+│ 👤 *OWNER* : SITHIJA
+│ 🌿 *LIBRARY* : BAILEYS
+│ 🌐 *WEB* : github.com
+│ 📍 *LOCATION* : SRI LANKA
+╰───────────────❍
 
-✅ Use *.menu* To Open Commands
-✅ Use *.owner* For Support
+╭───────────────❍
+│ *S E R V E R  I N F O*
+│
+│ 🍀 *RAM* : ${ram}MB
+│ 🪴 *NODE* : ${process.version}
+│ 💻 *PLATFORM* : ${os.platform()}
+╰───────────────❍
 
-> 🌿 POWERED BY SITHIJA-MD
+✅ Use *.menu* to access commands
+✅ Use *.owner* for support
+
+> ⚡ POWERED BY SITHIJA-MD
 `;
 
         await conn.sendMessage(from, {
             image: { url: config.ALIVE_IMG },
-            caption: aliveText
+            caption: alive
         }, { quoted: mek });
 
     } catch (e) {

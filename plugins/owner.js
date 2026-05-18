@@ -3,7 +3,7 @@ const { cmd } = require("../command");
 cmd({
     pattern: "owner",
     desc: "Show owner",
-    category: "main",
+    category: "owner",
     react: "👑",
     filename: __filename
 },
@@ -19,8 +19,8 @@ await danuwa.sendMessage(from, {
     footer: "SITHIJA-MD",
     buttons: [
         {
-            buttonId: ".menu",
-            buttonText: { displayText: "📋 MENU" },
+            buttonId: ".owner",
+            buttonText: { displayText: "👑 OWNER" },
             type: 1
         },
         {

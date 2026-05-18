@@ -5,7 +5,7 @@ const os = require("os");
 const pendingMenu = {};
 const numberEmojis = ["0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"];
 
-const headerImage = config.MENU_IMAGE || "https://files.catbox.moe/xxxxx.jpg";
+const headerImage = config.MENU_IMAGE || "https://github.com/sithija-bot/SITHIJA_MD/blob/main/alive.png1.png?raw=true";
 
 cmd({
   pattern: "menu",

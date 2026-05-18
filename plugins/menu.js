@@ -5,7 +5,7 @@ const path = require("path");
 const pendingMenu = {};
 const numberEmojis = ["0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"];
 
-const headerImage = "https://github.com/sithija-bot/SITHIJA_MD/blob/main/alive.png1.png?raw=true";
+const headerImage = "";
 
 cmd({
   pattern: "menu",

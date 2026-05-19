@@ -28,16 +28,11 @@ Example:
             );
         }
 
-        /* =========================
-           SEARCH API
-        ========================= */
-
+        // SEARCH
         const searchUrl =
 `${BASE_URL}/search?query=${encodeURIComponent(q)}&api_key=${API_KEY}`;
 
         const res = await axios.get(searchUrl);
-
-        console.log("SEARCH DATA:", JSON.stringify(res.data, null, 2));
 
         let results =
             res.data.result ||
@@ -45,24 +40,15 @@ Example:
             res.data.data ||
             [];
 
-        // OBJECT -> ARRAY FIX
         if (!Array.isArray(results)) {
             results = Object.values(results);
         }
 
-        if (results.length === 0) {
+        if (results.length < 1) {
             return reply("❌ No movies found");
         }
 
-        /* =========================
-           SAVE RESULTS
-        ========================= */
-
         movieReplies[sender] = results;
-
-        /* =========================
-           MOVIE LIST
-        ========================= */
 
         let txt = `🎬 *Search Results*\n\n`;
 
@@ -78,13 +64,9 @@ Example:
 
     } catch (e) {
 
-        console.log("SEARCH ERROR:", e);
+        console.log(e);
 
-        return reply(
-`❌ Search Error
-
-${e.message}`
-        );
+        return reply("❌ Search Error");
 
     }
 
@@ -113,13 +95,12 @@ replyHandlers.push({
 
             const movies = movieReplies[sender];
 
-            if (!movies || !movies[index]) {
+            if (!movies[index]) {
                 return reply("❌ Invalid number");
             }
 
             const movie = movies[index];
 
-            // CLEAR CACHE
             delete movieReplies[sender];
 
             const title =
@@ -131,10 +112,6 @@ replyHandlers.push({
                 movie.url ||
                 movie.link;
 
-            if (!movieUrl) {
-                return reply("❌ Movie URL not found");
-            }
-
             const image =
                 movie.image ||
                 movie.thumbnail ||
@@ -142,19 +119,16 @@ replyHandlers.push({
                 'https://files.catbox.moe/5xryn5.jpg';
 
             /* =========================
-               DETAILS API
+               DETAILS
             ========================= */
 
             let details = {};
 
             try {
 
-                const detailsUrl =
-`${BASE_URL}/details?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
-
-                const dres = await axios.get(detailsUrl);
-
-                console.log("DETAILS DATA:", JSON.stringify(dres.data, null, 2));
+                const dres = await axios.get(
+`${BASE_URL}/details?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`
+                );
 
                 details =
                     dres.data.result ||
@@ -164,38 +138,68 @@ replyHandlers.push({
 
             } catch (e) {
 
-                console.log("DETAILS ERROR:", e.message);
+                console.log(e);
 
             }
 
             /* =========================
-               DOWNLOAD API
+               DOWNLOAD
             ========================= */
 
             let downloads = [];
 
             try {
 
-                const dlUrl =
-`${BASE_URL}/dl?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
+                const dlres = await axios.get(
+`${BASE_URL}/dl?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`
+                );
 
-                console.log("DL URL:", dlUrl);
+                console.log("DOWNLOAD API:", JSON.stringify(dlres.data, null, 2));
 
-                const dlres = await axios.get(dlUrl);
+                // FIND LINKS RECURSIVELY
+                const findLinks = (obj) => {
 
-                console.log("DOWNLOAD DATA:", JSON.stringify(dlres.data, null, 2));
+                    let arr = [];
 
-                downloads =
-                    dlres.data.downloads ||
-                    dlres.data.result?.downloads ||
-                    dlres.data.result ||
-                    dlres.data.data ||
-                    [];
+                    if (Array.isArray(obj)) {
 
-                // OBJECT -> ARRAY FIX
-                if (!Array.isArray(downloads)) {
-                    downloads = Object.values(downloads);
-                }
+                        obj.forEach(v => {
+                            arr = arr.concat(findLinks(v));
+                        });
+
+                    }
+
+                    else if (typeof obj === "object" && obj !== null) {
+
+                        const possibleLink =
+                            obj.link ||
+                            obj.url ||
+                            obj.download ||
+                            obj.dl_link ||
+                            obj.href;
+
+                        if (possibleLink) {
+                            arr.push({
+                                quality:
+                                    obj.quality ||
+                                    obj.type ||
+                                    obj.name ||
+                                    "Movie",
+                                link: possibleLink
+                            });
+                        }
+
+                        Object.values(obj).forEach(v => {
+                            arr = arr.concat(findLinks(v));
+                        });
+
+                    }
+
+                    return arr;
+
+                };
+
+                downloads = findLinks(dlres.data);
 
             } catch (e) {
 
@@ -236,24 +240,8 @@ replyHandlers.push({
 
                 downloads.slice(0, 10).forEach((d, i) => {
 
-                    const quality =
-                        d.quality ||
-                        d.type ||
-                        d.name ||
-                        "Movie";
-
-                    const link =
-                        d.link ||
-                        d.url ||
-                        d.download ||
-                        d.dl_link ||
-                        d.href;
-
-                    caption += `*${i + 1}.* ${quality}\n`;
-
-                    if (link) {
-                        caption += `🔗 ${link}\n\n`;
-                    }
+                    caption += `*${i + 1}.* ${d.quality}\n`;
+                    caption += `🔗 ${d.link}\n\n`;
 
                 });
 
@@ -263,28 +251,21 @@ replyHandlers.push({
 
             }
 
-            /* =========================
-               SEND MESSAGE
-            ========================= */
-
+            // SEND
             await conn.sendMessage(
                 from,
                 {
                     image: { url: image },
-                    caption: caption
+                    caption
                 },
                 { quoted: mek }
             );
 
         } catch (e) {
 
-            console.log("MOVIE ERROR:", e);
+            console.log(e);
 
-            return reply(
-`❌ Movie Fetch Error
-
-${e.message}`
-            );
+            return reply("❌ Movie Fetch Error");
 
         }
 

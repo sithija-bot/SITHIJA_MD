@@ -28,11 +28,13 @@ Example:
             );
         }
 
-        // SEARCH
+        // SEARCH API
         const searchUrl =
 `${BASE_URL}/search?query=${encodeURIComponent(q)}&api_key=${API_KEY}`;
 
         const res = await axios.get(searchUrl);
+
+        console.log("SEARCH:", res.data);
 
         const results =
             res.data.result ||
@@ -40,7 +42,7 @@ Example:
             res.data.data ||
             [];
 
-        if (!results.length) {
+        if (!Array.isArray(results) || results.length === 0) {
             return reply("❌ No movies found");
         }
 
@@ -52,7 +54,7 @@ Example:
 
         results.slice(0, 10).forEach((v, i) => {
 
-            txt += `*${i + 1}.* ${v.title || v.name}\n`;
+            txt += `*${i + 1}.* ${v.title || v.name || "Unknown"}\n`;
 
         });
 
@@ -62,9 +64,9 @@ Example:
 
     } catch (e) {
 
-        console.log(e);
+        console.log("SEARCH ERROR:", e);
 
-        reply("❌ Search Error");
+        return reply(`❌ Search Error\n\n${e.message}`);
 
     }
 
@@ -93,7 +95,7 @@ replyHandlers.push({
 
             const movies = movieReplies[sender];
 
-            if (!movies[index]) {
+            if (!movies || !movies[index]) {
                 return reply("❌ Invalid number");
             }
 
@@ -110,21 +112,30 @@ replyHandlers.push({
                 movie.url ||
                 movie.link;
 
+            if (!movieUrl) {
+                return reply("❌ Movie URL not found");
+            }
+
             const image =
                 movie.image ||
                 movie.thumbnail ||
                 movie.poster ||
                 'https://files.catbox.moe/5xryn5.jpg';
 
-            // DETAILS
-            const detailsUrl =
-`${BASE_URL}/details?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
+            /* =========================
+               DETAILS API
+            ========================= */
 
             let details = {};
 
             try {
 
+                const detailsUrl =
+`${BASE_URL}/details?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
+
                 const dres = await axios.get(detailsUrl);
+
+                console.log("DETAILS:", dres.data);
 
                 details =
                     dres.data.result ||
@@ -132,53 +143,92 @@ replyHandlers.push({
                     dres.data ||
                     {};
 
-            } catch {}
+            } catch (e) {
 
-            // DOWNLOAD
-            const dlUrl =
-`${BASE_URL}/dl?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
+                console.log("DETAILS ERROR:", e.message);
+
+            }
+
+            /* =========================
+               DOWNLOAD API
+            ========================= */
 
             let downloads = [];
 
             try {
 
+                const dlUrl =
+`${BASE_URL}/dl?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
+
                 const dlres = await axios.get(dlUrl);
 
+                console.log("DOWNLOAD:", dlres.data);
+
                 downloads =
+                    dlres.data.result?.downloads ||
+                    dlres.data.downloads ||
                     dlres.data.result ||
                     dlres.data.data ||
                     [];
 
-            } catch {}
+                if (!Array.isArray(downloads)) {
+                    downloads = [];
+                }
 
-            // CAPTION
+            } catch (e) {
+
+                console.log("DOWNLOAD ERROR:", e.message);
+
+            }
+
+            /* =========================
+               CAPTION
+            ========================= */
+
             let caption =
 `╭━━〔 *CINESUBZ MOVIE* 〕━━⬣
-┃🎬 Title : ${title}
+┃🎬 *Title:* ${title}
 `;
 
             if (details.year)
-                caption += `┃📆 Year : ${details.year}\n`;
+                caption += `┃📆 *Year:* ${details.year}\n`;
 
             if (details.imdb)
-                caption += `┃⭐ IMDb : ${details.imdb}\n`;
+                caption += `┃⭐ *IMDb:* ${details.imdb}\n`;
 
             if (details.genre)
-                caption += `┃🎭 Genre : ${details.genre}\n`;
+                caption += `┃🎭 *Genre:* ${details.genre}\n`;
+
+            if (details.country)
+                caption += `┃🌍 *Country:* ${details.country}\n`;
 
             caption += `╰━━━━━━━━━━━━━━⬣\n\n`;
 
-            // LINKS
+            /* =========================
+               DOWNLOAD LINKS
+            ========================= */
+
             if (downloads.length > 0) {
 
-                caption += `📥 DOWNLOAD LINKS\n\n`;
+                caption += `📥 *DOWNLOAD LINKS*\n\n`;
 
-                downloads.slice(0, 5).forEach((d, i) => {
+                downloads.slice(0, 10).forEach((d, i) => {
 
-                    caption += `*${i + 1}.* ${d.quality || 'Movie'}\n`;
+                    const quality =
+                        d.quality ||
+                        d.type ||
+                        "Movie";
 
-                    if (d.link) {
-                        caption += `🔗 ${d.link}\n\n`;
+                    const link =
+                        d.link ||
+                        d.url ||
+                        d.download ||
+                        d.dl_link;
+
+                    caption += `*${i + 1}.* ${quality}\n`;
+
+                    if (link) {
+                        caption += `🔗 ${link}\n\n`;
                     }
 
                 });
@@ -189,21 +239,28 @@ replyHandlers.push({
 
             }
 
-            // SEND
+            /* =========================
+               SEND MESSAGE
+            ========================= */
+
             await conn.sendMessage(
                 from,
                 {
                     image: { url: image },
-                    caption
+                    caption: caption
                 },
                 { quoted: mek }
             );
 
         } catch (e) {
 
-            console.log(e);
+            console.log("MOVIE ERROR:", e);
 
-            reply("❌ Movie fetch error");
+            return reply(
+`❌ Movie Fetch Error
+
+${e.message}`
+            );
 
         }
 

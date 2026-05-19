@@ -10,7 +10,7 @@ cmd({
     pattern: "cinesubz",
     alias: ["movie", "cs"],
     react: "🎬",
-    desc: "Search movies",
+    desc: "Search movies from Cinesubz",
     category: "search",
     filename: __filename
 },
@@ -27,10 +27,7 @@ Example:
             );
         }
 
-        /* =========================
-           SEARCH API
-        ========================= */
-
+        // SEARCH API
         const searchUrl =
 `${BASE_URL}/search?query=${encodeURIComponent(q)}&api_key=${API_KEY}`;
 
@@ -50,9 +47,11 @@ Example:
             return reply("❌ No movies found");
         }
 
+        // SAVE RESULTS
         movieReplies[sender] = results;
 
-        let txt = `🎬 *Search Results*\n\n`;
+        // SEND LIST
+        let txt = `🎬 *CINESUBZ SEARCH*\n\n`;
 
         results.slice(0, 10).forEach((v, i) => {
 
@@ -60,7 +59,7 @@ Example:
 
         });
 
-        txt += `\n_Reply with movie number_`;
+        txt += `\n📌 Reply with movie number`;
 
         return reply(txt);
 
@@ -153,34 +152,40 @@ replyHandlers.push({
                DOWNLOAD API
             ========================= */
 
-            let downloads = [];
+            let links = [];
 
             try {
 
                 const dlUrl =
 `${BASE_URL}/dl?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
 
-                const dlres = await axios.get(dlUrl);
+                const dlres = await axios.get(dlUrl, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0'
+                    }
+                });
 
-                console.log("DOWNLOAD API RAW:", dlres.data);
+                console.log("DOWNLOAD API:", dlres.data);
 
-                // Convert response to string
-                const rawData =
+                // RAW DATA
+                const raw =
                     typeof dlres.data === "string"
                     ? dlres.data
                     : JSON.stringify(dlres.data);
 
-                // Extract all URLs
-                const foundLinks =
-                    rawData.match(/https?:\/\/[^\s"'<>]+/g) || [];
+                // EXTRACT URLS
+                const found =
+                    raw.match(/https?:\/\/[^\s"'<>\\]+/g) || [];
 
-                // Remove duplicates
-                const uniqueLinks = [...new Set(foundLinks)];
+                // REMOVE DUPLICATES
+                links = [...new Set(found)];
 
-                downloads = uniqueLinks.map((link, i) => ({
-                    quality: `Download ${i + 1}`,
-                    link
-                }));
+                // REMOVE API LINKS
+                links = links.filter(v =>
+                    !v.includes('/cinesubz/dl') &&
+                    !v.includes('/cinesubz/details') &&
+                    !v.includes('/cinesubz/search')
+                );
 
             } catch (e) {
 
@@ -215,14 +220,14 @@ replyHandlers.push({
                DOWNLOAD LINKS
             ========================= */
 
-            if (downloads.length > 0) {
+            if (links.length > 0) {
 
                 caption += `📥 *DOWNLOAD LINKS*\n\n`;
 
-                downloads.slice(0, 10).forEach((d, i) => {
+                links.slice(0, 10).forEach((v, i) => {
 
-                    caption += `*${i + 1}.* ${d.quality}\n`;
-                    caption += `🔗 ${d.link}\n\n`;
+                    caption += `*${i + 1}.* Download Link\n`;
+                    caption += `🔗 ${v}\n\n`;
 
                 });
 
@@ -233,7 +238,7 @@ replyHandlers.push({
             }
 
             /* =========================
-               SEND MESSAGE
+               SEND
             ========================= */
 
             await conn.sendMessage(

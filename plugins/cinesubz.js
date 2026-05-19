@@ -8,8 +8,8 @@ cmd({
     pattern: "cinesubz",
     alias: ["movie", "cs"],
     react: "🎬",
-    desc: "Search movies from Cinesubz API",
-    category: "movie",
+    desc: "Search movies from Cinesubz",
+    category: "search",
     filename: __filename
 },
 
@@ -19,18 +19,22 @@ async (conn, mek, m, { from, q, reply }) => {
 
         if (!q) {
             return reply(
-`🎬 Please give a movie name.
+`🎬 Enter movie name
 
 Example:
-.cinesubz spider man`
+.cs spider man`
             );
         }
 
-        // SEARCH API
+        // SEARCH
         const searchUrl =
 `${BASE_URL}/search?query=${encodeURIComponent(q)}&api_key=${API_KEY}`;
 
+        console.log("SEARCH URL:", searchUrl);
+
         const searchRes = await axios.get(searchUrl);
+
+        console.log("SEARCH DATA:", searchRes.data);
 
         const results =
             searchRes.data.result ||
@@ -38,96 +42,117 @@ Example:
             searchRes.data.data ||
             [];
 
-        if (!results.length) {
-            return reply("❌ No movies found.");
+        if (!Array.isArray(results) || results.length === 0) {
+            return reply("❌ No movie found");
         }
 
-        // FIRST RESULT
-        const first = results[0];
+        const movie = results[0];
 
         const title =
-            first.title ||
-            first.name ||
+            movie.title ||
+            movie.name ||
             "Unknown";
 
         const movieUrl =
-            first.url ||
-            first.link;
+            movie.url ||
+            movie.link;
 
         const image =
-            first.image ||
-            first.thumbnail ||
-            first.poster ||
+            movie.image ||
+            movie.thumbnail ||
+            movie.poster ||
             'https://files.catbox.moe/5xryn5.jpg';
 
-        // DETAILS API
+        if (!movieUrl) {
+            return reply("❌ Movie URL not found");
+        }
+
+        // DETAILS
         const detailsUrl =
 `${BASE_URL}/details?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
 
-        const detailsRes = await axios.get(detailsUrl);
+        console.log("DETAILS URL:", detailsUrl);
 
-        const details =
-            detailsRes.data.result ||
-            detailsRes.data.data ||
-            detailsRes.data ||
-            {};
+        let details = {};
 
-        // DOWNLOAD API
+        try {
+
+            const detailsRes = await axios.get(detailsUrl);
+
+            console.log("DETAILS DATA:", detailsRes.data);
+
+            details =
+                detailsRes.data.result ||
+                detailsRes.data.data ||
+                detailsRes.data ||
+                {};
+
+        } catch (e) {
+            console.log("DETAILS ERROR:", e.message);
+        }
+
+        // DOWNLOADS
         const dlUrl =
 `${BASE_URL}/dl?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
 
-        const dlRes = await axios.get(dlUrl);
+        console.log("DL URL:", dlUrl);
 
-        const downloads =
-            dlRes.data.result ||
-            dlRes.data.data ||
-            [];
+        let downloads = [];
 
-        // CAPTION
+        try {
+
+            const dlRes = await axios.get(dlUrl);
+
+            console.log("DL DATA:", dlRes.data);
+
+            downloads =
+                dlRes.data.result ||
+                dlRes.data.data ||
+                [];
+
+        } catch (e) {
+            console.log("DL ERROR:", e.message);
+        }
+
+        // MESSAGE
         let caption =
 `╭━━〔 *CINESUBZ MOVIE* 〕━━⬣
-┃🎬 *Title:* ${title}
+┃🎬 Title : ${title}
 `;
 
         if (details.year)
-            caption += `┃📆 *Year:* ${details.year}\n`;
+            caption += `┃📆 Year : ${details.year}\n`;
 
         if (details.imdb)
-            caption += `┃⭐ *IMDb:* ${details.imdb}\n`;
+            caption += `┃⭐ IMDb : ${details.imdb}\n`;
 
         if (details.genre)
-            caption += `┃🎭 *Genre:* ${details.genre}\n`;
-
-        if (details.country)
-            caption += `┃🌍 *Country:* ${details.country}\n`;
-
-        if (details.runtime)
-            caption += `┃⏰ *Runtime:* ${details.runtime}\n`;
+            caption += `┃🎭 Genre : ${details.genre}\n`;
 
         caption += `╰━━━━━━━━━━━━━━⬣\n\n`;
 
-        // DOWNLOAD LINKS
+        // LINKS
         if (downloads.length > 0) {
 
-            caption += `📥 *DOWNLOAD LINKS*\n\n`;
+            caption += `📥 DOWNLOAD LINKS\n\n`;
 
-            downloads.slice(0, 10).forEach((d, i) => {
+            downloads.slice(0, 5).forEach((d, i) => {
 
                 caption += `*${i + 1}.* ${d.quality || 'Movie'}\n`;
 
                 if (d.link) {
-                    caption += `🔗 ${d.link}\n\n`;
+                    caption += `${d.link}\n\n`;
                 }
 
             });
 
         } else {
 
-            caption += `❌ No download links found.`;
+            caption += `❌ No download links found`;
 
         }
 
-        // SEND MESSAGE
+        // SEND
         await conn.sendMessage(
             from,
             {
@@ -139,9 +164,13 @@ Example:
 
     } catch (e) {
 
-        console.log(e);
+        console.log("FULL ERROR:", e);
 
-        reply("❌ Error while fetching movie.");
+        reply(
+`❌ Error while fetching movie
+
+${e.message}`
+        );
 
     }
 

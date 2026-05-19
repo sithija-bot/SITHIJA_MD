@@ -1,19 +1,21 @@
-const { cmd } = require('../command');
+const { cmd, replyHandlers } = require('../command');
 const axios = require('axios');
 
 const API_KEY = 'lakiya_6dfa6b43064dd56b5c71acb12fc9b30e4d88dd0deb19c8b14f897d12fc87b8e6';
 const BASE_URL = 'https://nexora.laksidunimsara.com/cinesubz';
 
+const movieReplies = {};
+
 cmd({
     pattern: "cinesubz",
     alias: ["movie", "cs"],
     react: "🎬",
-    desc: "Search movies from Cinesubz",
+    desc: "Search movies",
     category: "search",
     filename: __filename
 },
 
-async (conn, mek, m, { from, q, reply }) => {
+async (conn, mek, m, { from, q, reply, sender }) => {
 
     try {
 
@@ -30,147 +32,180 @@ Example:
         const searchUrl =
 `${BASE_URL}/search?query=${encodeURIComponent(q)}&api_key=${API_KEY}`;
 
-        console.log("SEARCH URL:", searchUrl);
-
-        const searchRes = await axios.get(searchUrl);
-
-        console.log("SEARCH DATA:", searchRes.data);
+        const res = await axios.get(searchUrl);
 
         const results =
-            searchRes.data.result ||
-            searchRes.data.results ||
-            searchRes.data.data ||
+            res.data.result ||
+            res.data.results ||
+            res.data.data ||
             [];
 
-        if (!Array.isArray(results) || results.length === 0) {
-            return reply("❌ No movie found");
+        if (!results.length) {
+            return reply("❌ No movies found");
         }
 
-        const movie = results[0];
+        // SAVE RESULTS
+        movieReplies[sender] = results;
 
-        const title =
-            movie.title ||
-            movie.name ||
-            "Unknown";
+        // MOVIE LIST
+        let txt = `🎬 *Search Results*\n\n`;
 
-        const movieUrl =
-            movie.url ||
-            movie.link;
+        results.slice(0, 10).forEach((v, i) => {
 
-        const image =
-            movie.image ||
-            movie.thumbnail ||
-            movie.poster ||
-            'https://files.catbox.moe/5xryn5.jpg';
+            txt += `*${i + 1}.* ${v.title || v.name}\n`;
 
-        if (!movieUrl) {
-            return reply("❌ Movie URL not found");
-        }
+        });
 
-        // DETAILS
-        const detailsUrl =
+        txt += `\n_Reply with movie number_`;
+
+        return reply(txt);
+
+    } catch (e) {
+
+        console.log(e);
+
+        reply("❌ Search Error");
+
+    }
+
+});
+
+/* =========================
+   REPLY HANDLER
+========================= */
+
+replyHandlers.push({
+
+    filter: (text, { sender }) => {
+
+        return (
+            movieReplies[sender] &&
+            !isNaN(text)
+        );
+
+    },
+
+    function: async (conn, mek, m, { from, body, sender, reply }) => {
+
+        try {
+
+            const index = Number(body) - 1;
+
+            const movies = movieReplies[sender];
+
+            if (!movies[index]) {
+                return reply("❌ Invalid number");
+            }
+
+            const movie = movies[index];
+
+            delete movieReplies[sender];
+
+            const title =
+                movie.title ||
+                movie.name ||
+                "Unknown";
+
+            const movieUrl =
+                movie.url ||
+                movie.link;
+
+            const image =
+                movie.image ||
+                movie.thumbnail ||
+                movie.poster ||
+                'https://files.catbox.moe/5xryn5.jpg';
+
+            // DETAILS
+            const detailsUrl =
 `${BASE_URL}/details?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
 
-        console.log("DETAILS URL:", detailsUrl);
+            let details = {};
 
-        let details = {};
+            try {
 
-        try {
+                const dres = await axios.get(detailsUrl);
 
-            const detailsRes = await axios.get(detailsUrl);
+                details =
+                    dres.data.result ||
+                    dres.data.data ||
+                    dres.data ||
+                    {};
 
-            console.log("DETAILS DATA:", detailsRes.data);
+            } catch {}
 
-            details =
-                detailsRes.data.result ||
-                detailsRes.data.data ||
-                detailsRes.data ||
-                {};
-
-        } catch (e) {
-            console.log("DETAILS ERROR:", e.message);
-        }
-
-        // DOWNLOADS
-        const dlUrl =
+            // DOWNLOAD
+            const dlUrl =
 `${BASE_URL}/dl?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
 
-        console.log("DL URL:", dlUrl);
+            let downloads = [];
 
-        let downloads = [];
+            try {
 
-        try {
+                const dlres = await axios.get(dlUrl);
 
-            const dlRes = await axios.get(dlUrl);
+                downloads =
+                    dlres.data.result ||
+                    dlres.data.data ||
+                    [];
 
-            console.log("DL DATA:", dlRes.data);
+            } catch {}
 
-            downloads =
-                dlRes.data.result ||
-                dlRes.data.data ||
-                [];
-
-        } catch (e) {
-            console.log("DL ERROR:", e.message);
-        }
-
-        // MESSAGE
-        let caption =
+            // CAPTION
+            let caption =
 `╭━━〔 *CINESUBZ MOVIE* 〕━━⬣
 ┃🎬 Title : ${title}
 `;
 
-        if (details.year)
-            caption += `┃📆 Year : ${details.year}\n`;
+            if (details.year)
+                caption += `┃📆 Year : ${details.year}\n`;
 
-        if (details.imdb)
-            caption += `┃⭐ IMDb : ${details.imdb}\n`;
+            if (details.imdb)
+                caption += `┃⭐ IMDb : ${details.imdb}\n`;
 
-        if (details.genre)
-            caption += `┃🎭 Genre : ${details.genre}\n`;
+            if (details.genre)
+                caption += `┃🎭 Genre : ${details.genre}\n`;
 
-        caption += `╰━━━━━━━━━━━━━━⬣\n\n`;
+            caption += `╰━━━━━━━━━━━━━━⬣\n\n`;
 
-        // LINKS
-        if (downloads.length > 0) {
+            // LINKS
+            if (downloads.length > 0) {
 
-            caption += `📥 DOWNLOAD LINKS\n\n`;
+                caption += `📥 DOWNLOAD LINKS\n\n`;
 
-            downloads.slice(0, 5).forEach((d, i) => {
+                downloads.slice(0, 5).forEach((d, i) => {
 
-                caption += `*${i + 1}.* ${d.quality || 'Movie'}\n`;
+                    caption += `*${i + 1}.* ${d.quality || 'Movie'}\n`;
 
-                if (d.link) {
-                    caption += `${d.link}\n\n`;
-                }
+                    if (d.link) {
+                        caption += `🔗 ${d.link}\n\n`;
+                    }
 
-            });
+                });
 
-        } else {
+            } else {
 
-            caption += `❌ No download links found`;
+                caption += `❌ No download links found`;
+
+            }
+
+            // SEND
+            await conn.sendMessage(
+                from,
+                {
+                    image: { url: image },
+                    caption
+                },
+                { quoted: mek }
+            );
+
+        } catch (e) {
+
+            console.log(e);
+
+            reply("❌ Movie fetch error");
 
         }
-
-        // SEND
-        await conn.sendMessage(
-            from,
-            {
-                image: { url: image },
-                caption: caption
-            },
-            { quoted: mek }
-        );
-
-    } catch (e) {
-
-        console.log("FULL ERROR:", e);
-
-        reply(
-`❌ Error while fetching movie
-
-${e.message}`
-        );
 
     }
 

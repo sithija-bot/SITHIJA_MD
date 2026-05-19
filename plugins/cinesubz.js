@@ -28,28 +28,42 @@ Example:
             );
         }
 
-        // SEARCH API
+        /* =========================
+           SEARCH API
+        ========================= */
+
         const searchUrl =
 `${BASE_URL}/search?query=${encodeURIComponent(q)}&api_key=${API_KEY}`;
 
         const res = await axios.get(searchUrl);
 
-        console.log("SEARCH:", res.data);
+        console.log("SEARCH DATA:", JSON.stringify(res.data, null, 2));
 
-        const results =
+        let results =
             res.data.result ||
             res.data.results ||
             res.data.data ||
             [];
 
-        if (!Array.isArray(results) || results.length === 0) {
+        // OBJECT -> ARRAY FIX
+        if (!Array.isArray(results)) {
+            results = Object.values(results);
+        }
+
+        if (results.length === 0) {
             return reply("❌ No movies found");
         }
 
-        // SAVE RESULTS
+        /* =========================
+           SAVE RESULTS
+        ========================= */
+
         movieReplies[sender] = results;
 
-        // MOVIE LIST
+        /* =========================
+           MOVIE LIST
+        ========================= */
+
         let txt = `🎬 *Search Results*\n\n`;
 
         results.slice(0, 10).forEach((v, i) => {
@@ -66,7 +80,11 @@ Example:
 
         console.log("SEARCH ERROR:", e);
 
-        return reply(`❌ Search Error\n\n${e.message}`);
+        return reply(
+`❌ Search Error
+
+${e.message}`
+        );
 
     }
 
@@ -101,6 +119,7 @@ replyHandlers.push({
 
             const movie = movies[index];
 
+            // CLEAR CACHE
             delete movieReplies[sender];
 
             const title =
@@ -135,7 +154,7 @@ replyHandlers.push({
 
                 const dres = await axios.get(detailsUrl);
 
-                console.log("DETAILS:", dres.data);
+                console.log("DETAILS DATA:", JSON.stringify(dres.data, null, 2));
 
                 details =
                     dres.data.result ||
@@ -160,24 +179,27 @@ replyHandlers.push({
                 const dlUrl =
 `${BASE_URL}/dl?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
 
+                console.log("DL URL:", dlUrl);
+
                 const dlres = await axios.get(dlUrl);
 
-                console.log("DOWNLOAD:", dlres.data);
+                console.log("DOWNLOAD DATA:", JSON.stringify(dlres.data, null, 2));
 
                 downloads =
-                    dlres.data.result?.downloads ||
                     dlres.data.downloads ||
+                    dlres.data.result?.downloads ||
                     dlres.data.result ||
                     dlres.data.data ||
                     [];
 
+                // OBJECT -> ARRAY FIX
                 if (!Array.isArray(downloads)) {
-                    downloads = [];
+                    downloads = Object.values(downloads);
                 }
 
             } catch (e) {
 
-                console.log("DOWNLOAD ERROR:", e.message);
+                console.log("DOWNLOAD ERROR:", e);
 
             }
 
@@ -217,13 +239,15 @@ replyHandlers.push({
                     const quality =
                         d.quality ||
                         d.type ||
+                        d.name ||
                         "Movie";
 
                     const link =
                         d.link ||
                         d.url ||
                         d.download ||
-                        d.dl_link;
+                        d.dl_link ||
+                        d.href;
 
                     caption += `*${i + 1}.* ${quality}\n`;
 

@@ -14,7 +14,6 @@ cmd({
     category: "search",
     filename: __filename
 },
-
 async (conn, mek, m, { from, q, reply, sender }) => {
 
     try {
@@ -28,7 +27,10 @@ Example:
             );
         }
 
-        // SEARCH
+        /* =========================
+           SEARCH API
+        ========================= */
+
         const searchUrl =
 `${BASE_URL}/search?query=${encodeURIComponent(q)}&api_key=${API_KEY}`;
 
@@ -44,7 +46,7 @@ Example:
             results = Object.values(results);
         }
 
-        if (results.length < 1) {
+        if (results.length === 0) {
             return reply("❌ No movies found");
         }
 
@@ -64,7 +66,7 @@ Example:
 
     } catch (e) {
 
-        console.log(e);
+        console.log("SEARCH ERROR:", e);
 
         return reply("❌ Search Error");
 
@@ -95,7 +97,7 @@ replyHandlers.push({
 
             const movies = movieReplies[sender];
 
-            if (!movies[index]) {
+            if (!movies || !movies[index]) {
                 return reply("❌ Invalid number");
             }
 
@@ -112,6 +114,10 @@ replyHandlers.push({
                 movie.url ||
                 movie.link;
 
+            if (!movieUrl) {
+                return reply("❌ Movie URL not found");
+            }
+
             const image =
                 movie.image ||
                 movie.thumbnail ||
@@ -119,16 +125,17 @@ replyHandlers.push({
                 'https://files.catbox.moe/5xryn5.jpg';
 
             /* =========================
-               DETAILS
+               DETAILS API
             ========================= */
 
             let details = {};
 
             try {
 
-                const dres = await axios.get(
-`${BASE_URL}/details?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`
-                );
+                const detailsUrl =
+`${BASE_URL}/details?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
+
+                const dres = await axios.get(detailsUrl);
 
                 details =
                     dres.data.result ||
@@ -138,68 +145,42 @@ replyHandlers.push({
 
             } catch (e) {
 
-                console.log(e);
+                console.log("DETAILS ERROR:", e);
 
             }
 
             /* =========================
-               DOWNLOAD
+               DOWNLOAD API
             ========================= */
 
             let downloads = [];
 
             try {
 
-                const dlres = await axios.get(
-`${BASE_URL}/dl?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`
-                );
+                const dlUrl =
+`${BASE_URL}/dl?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
 
-                console.log("DOWNLOAD API:", JSON.stringify(dlres.data, null, 2));
+                const dlres = await axios.get(dlUrl);
 
-                // FIND LINKS RECURSIVELY
-                const findLinks = (obj) => {
+                console.log("DOWNLOAD API RAW:", dlres.data);
 
-                    let arr = [];
+                // Convert response to string
+                const rawData =
+                    typeof dlres.data === "string"
+                    ? dlres.data
+                    : JSON.stringify(dlres.data);
 
-                    if (Array.isArray(obj)) {
+                // Extract all URLs
+                const foundLinks =
+                    rawData.match(/https?:\/\/[^\s"'<>]+/g) || [];
 
-                        obj.forEach(v => {
-                            arr = arr.concat(findLinks(v));
-                        });
+                // Remove duplicates
+                const uniqueLinks = [...new Set(foundLinks)];
 
-                    }
-
-                    else if (typeof obj === "object" && obj !== null) {
-
-                        const possibleLink =
-                            obj.link ||
-                            obj.url ||
-                            obj.download ||
-                            obj.dl_link ||
-                            obj.href;
-
-                        if (possibleLink) {
-                            arr.push({
-                                quality:
-                                    obj.quality ||
-                                    obj.type ||
-                                    obj.name ||
-                                    "Movie",
-                                link: possibleLink
-                            });
-                        }
-
-                        Object.values(obj).forEach(v => {
-                            arr = arr.concat(findLinks(v));
-                        });
-
-                    }
-
-                    return arr;
-
-                };
-
-                downloads = findLinks(dlres.data);
+                downloads = uniqueLinks.map((link, i) => ({
+                    quality: `Download ${i + 1}`,
+                    link
+                }));
 
             } catch (e) {
 
@@ -251,7 +232,10 @@ replyHandlers.push({
 
             }
 
-            // SEND
+            /* =========================
+               SEND MESSAGE
+            ========================= */
+
             await conn.sendMessage(
                 from,
                 {
@@ -263,7 +247,7 @@ replyHandlers.push({
 
         } catch (e) {
 
-            console.log(e);
+            console.log("MOVIE ERROR:", e);
 
             return reply("❌ Movie Fetch Error");
 

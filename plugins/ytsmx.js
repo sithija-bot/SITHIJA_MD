@@ -9,11 +9,11 @@ const API_KEY =
 
 async function searchMovies(query) {
   try {
-    const url = `https://nexora.laksidunimsara.com/yts/search?query=${encodeURIComponent(
+    const api = `https://nexora.laksidunimsara.com/yts/search?query=${encodeURIComponent(
       query
     )}&api_key=${API_KEY}`;
 
-    const res = await axios.get(url);
+    const res = await axios.get(api);
 
     if (!res.data || !Array.isArray(res.data.results)) return [];
 
@@ -23,7 +23,7 @@ async function searchMovies(query) {
       year: m.year || "N/A",
       rating: m.rating || "N/A",
       url: m.url,
-      image: m.image,
+      image: m.image || m.thumbnail || "",
     }));
   } catch (e) {
     console.log("Search Error:", e.message);
@@ -51,16 +51,19 @@ cmd(
     pattern: "movie2",
     alias: ["yts", "ytsmx", "cinema"],
     react: "🎬",
-    desc: "Search movies from YTSMX",
+    desc: "Search and download movies from YTSMX",
     category: "movie",
     filename: __filename,
   },
   async (conn, mek, m, { from, q, sender, reply }) => {
     try {
-      if (!q)
+      if (!q) {
         return reply(
-          "*🎬 YTS Movie Search*\n\nExample:\n.movie avengers"
+          `*🎬 YTSMX MOVIE SEARCH*\n\n` +
+            `📌 Example:\n` +
+            `.movie avengers`
         );
+      }
 
       await reply("*🔍 Searching movies...*");
 
@@ -75,20 +78,22 @@ cmd(
         timestamp: Date.now(),
       };
 
-      let text = `*🎬 YTS Search Results*\n\n`;
+      let text = `*🎬 YTSMX SEARCH RESULTS*\n\n`;
 
-      results.forEach((m, i) => {
-        text += `*${i + 1}.* ${m.title}\n`;
-        text += `📅 Year : ${m.year}\n`;
-        text += `⭐ Rating : ${m.rating}\n\n`;
+      results.forEach((movie, i) => {
+        text +=
+          `*${i + 1}.* ${movie.title}\n` +
+          `📅 Year : ${movie.year}\n` +
+          `⭐ Rating : ${movie.rating}\n\n`;
       });
 
-      text += `*Reply with movie number*\n`;
+      text += `*📩 Reply with movie number*\n`;
 
       await reply(text);
     } catch (e) {
       console.log(e);
-      reply("*❌ Error searching movie!*");
+
+      reply("*❌ Movie search failed!*");
     }
   }
 );
@@ -103,59 +108,77 @@ cmd(
   },
   async (conn, mek, m, { body, sender, from, reply }) => {
     try {
-      const index = parseInt(body) - 1;
+      await conn.sendMessage(from, {
+        react: {
+          text: "🎥",
+          key: mek.key,
+        },
+      });
 
-      const movie = pendingSearch[sender].results[index];
+      const index = parseInt(body.trim()) - 1;
+
+      const selectedMovie = pendingSearch[sender].results[index];
 
       delete pendingSearch[sender];
 
-      await conn.sendMessage(from, {
-        react: { text: "🎥", key: mek.key },
-      });
-
-      const details = await getMovieDetails(movie.url);
+      const details = await getMovieDetails(selectedMovie.url);
 
       if (!details) {
         return reply("*❌ Failed to fetch movie details!*");
       }
 
-      let caption = `*🎬 ${details.title || movie.title}*\n\n`;
+      const downloads =
+        details.downloads ||
+        details.links ||
+        details.qualities ||
+        [];
 
-      caption += `⭐ Rating : ${details.rating || "N/A"}\n`;
-      caption += `📅 Year : ${details.year || "N/A"}\n`;
-      caption += `⏱ Runtime : ${details.runtime || "N/A"}\n`;
-      caption += `🎭 Genre : ${
-        details.genre?.join(", ") || "N/A"
-      }\n\n`;
-
-      caption += `📝 ${details.description || "No description"}\n\n`;
-
-      caption += `*📥 Available Qualities*\n`;
-
-      const qualities = details.downloads || [];
-
-      if (!qualities.length) {
+      if (!downloads.length) {
         return reply("*❌ No download links found!*");
       }
 
-      qualities.forEach((q, i) => {
-        caption += `\n*${i + 1}.* ${q.quality}`;
-        caption += `\n💾 Size : ${q.size}`;
-      });
-
-      caption += `\n\n*Reply with quality number*`;
-
       pendingQuality[sender] = {
         movie: details,
-        qualities,
+        qualities: downloads,
+        timestamp: Date.now(),
       };
 
-      if (details.image || movie.image) {
+      let caption =
+        `*🎬 ${details.title || selectedMovie.title}*\n\n` +
+        `⭐ Rating : ${details.rating || "N/A"}\n` +
+        `📅 Year : ${details.year || "N/A"}\n` +
+        `⏱ Runtime : ${details.runtime || "N/A"}\n` +
+        `🎭 Genre : ${
+          Array.isArray(details.genre)
+            ? details.genre.join(", ")
+            : details.genre || "N/A"
+        }\n\n` +
+        `📝 ${
+          details.description ||
+          details.desc ||
+          "No description available."
+        }\n\n` +
+        `*📥 AVAILABLE QUALITIES*\n`;
+
+      downloads.forEach((d, i) => {
+        caption +=
+          `\n*${i + 1}.* ${d.quality || "Unknown"}\n` +
+          `💾 Size : ${d.size || "N/A"}\n`;
+      });
+
+      caption += `\n*📩 Reply with quality number*`;
+
+      const image =
+        details.image ||
+        details.thumbnail ||
+        selectedMovie.image;
+
+      if (image) {
         await conn.sendMessage(
           from,
           {
             image: {
-              url: details.image || movie.image,
+              url: image,
             },
             caption,
           },
@@ -166,7 +189,8 @@ cmd(
       }
     } catch (e) {
       console.log(e);
-      reply("*❌ Error fetching details!*");
+
+      reply("*❌ Error fetching movie details!*");
     }
   }
 );
@@ -179,9 +203,16 @@ cmd(
       parseInt(text) > 0 &&
       parseInt(text) <= pendingQuality[sender].qualities.length,
   },
-  async (conn, mek, m, { body, sender, from, reply }) => {
+  async (conn, mek, m, { body, sender, reply, from }) => {
     try {
-      const index = parseInt(body) - 1;
+      await conn.sendMessage(from, {
+        react: {
+          text: "⬇️",
+          key: mek.key,
+        },
+      });
+
+      const index = parseInt(body.trim()) - 1;
 
       const data = pendingQuality[sender];
 
@@ -189,40 +220,73 @@ cmd(
 
       const selected = data.qualities[index];
 
-      await conn.sendMessage(from, {
-        react: { text: "⬇️", key: mek.key },
-      });
+      const downloadUrl =
+        selected.url ||
+        selected.link ||
+        selected.download ||
+        selected.downloadLink ||
+        selected.direct;
 
-      let txt = `*🎬 ${data.movie.title}*\n\n`;
+      if (!downloadUrl) {
+        return reply("*❌ Download link not found!*");
+      }
 
-      txt += `📥 Quality : ${selected.quality}\n`;
-      txt += `💾 Size : ${selected.size}\n\n`;
+      await reply(
+        `*⬇️ Sending ${selected.quality || "Movie"}...*\nPlease wait.`
+      );
 
-      txt += `🔗 Download Link:\n${selected.url || selected.link}\n\n`;
+      await conn.sendMessage(
+        from,
+        {
+          document: {
+            url: downloadUrl,
+          },
+          mimetype: "video/mp4",
 
-      txt += `🍿 Enjoy Your Movie`;
+          fileName: `${(
+            data.movie.title || "movie"
+          ).substring(0, 50)} - ${
+            selected.quality || "HD"
+          }.mp4`.replace(/[^\w\s.-]/gi, ""),
 
-      await reply(txt);
-    } catch (e) {
-      console.log(e);
-      reply("*❌ Failed to send download link!*");
+          caption:
+            `*🎬 ${data.movie.title || "Movie"}*\n` +
+            `*📊 Quality:* ${
+              selected.quality || "N/A"
+            }\n` +
+            `*💾 Size:* ${
+              selected.size || "N/A"
+            }\n\n` +
+            `*🍿 Enjoy your movie!*`,
+        },
+        { quoted: mek }
+      );
+    } catch (error) {
+      console.error("Send document error:", error);
+
+      reply(
+        `*❌ Failed to send movie!*\n${
+          error.message || "Unknown error"
+        }`
+      );
     }
   }
 );
 
 setInterval(() => {
   const now = Date.now();
+
   const timeout = 10 * 60 * 1000;
 
-  for (const x in pendingSearch) {
-    if (now - pendingSearch[x].timestamp > timeout) {
-      delete pendingSearch[x];
+  for (const s in pendingSearch) {
+    if (now - pendingSearch[s].timestamp > timeout) {
+      delete pendingSearch[s];
     }
   }
 
-  for (const x in pendingQuality) {
-    if (now - pendingQuality[x].timestamp > timeout) {
-      delete pendingQuality[x];
+  for (const s in pendingQuality) {
+    if (now - pendingQuality[s].timestamp > timeout) {
+      delete pendingQuality[s];
     }
   }
 }, 5 * 60 * 1000);

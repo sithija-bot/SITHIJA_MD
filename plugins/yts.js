@@ -3,21 +3,22 @@ const fetch = require("node-fetch");
 
 const API_KEY = "lakiya_6dfa6b43064dd56b5c71acb12fc9b30e4d88dd0deb19c8b14f897d12fc87b8e6";
 
+const movieStore = {};
+
 cmd({
     pattern: "yts",
     alias: ["movie"],
     react: "🎬",
-    desc: "Search YTS Movies",
+    desc: "Search movies",
     category: "movie",
     filename: __filename
 },
-async (conn, mek, m, { from, q, reply }) => {
+async (conn, mek, m, { from, q, reply, sender }) => {
 
     try {
 
         if (!q) return reply("❌ Movie name ekak denna");
 
-        // SEARCH API
         const searchUrl =
         `https://nexora.laksidunimsara.com/yts/search?query=${encodeURIComponent(q)}&api_key=${API_KEY}`;
 
@@ -26,7 +27,6 @@ async (conn, mek, m, { from, q, reply }) => {
 
         console.log(json);
 
-        // FIX RESULTS
         const movies = json.results || json.data || json.movies;
 
         if (!movies || movies.length === 0) {
@@ -35,7 +35,6 @@ async (conn, mek, m, { from, q, reply }) => {
 
         const movie = movies[0];
 
-        // DETAILS API
         const detailsUrl =
         `https://nexora.laksidunimsara.com/yts/movie-details?url=${encodeURIComponent(movie.url)}&api_key=${API_KEY}`;
 
@@ -46,24 +45,22 @@ async (conn, mek, m, { from, q, reply }) => {
 
         const data = djson.movie || djson.data || djson;
 
-        let text = `🎬 *${data.title || "Unknown"}*\n\n`;
-        text += `⭐ Rating : ${data.rating || "N/A"}\n`;
-        text += `📅 Year : ${data.year || "N/A"}\n`;
-        text += `🎭 Genre : ${data.genre || "N/A"}\n\n`;
-
-        if (data.downloads && data.downloads.length > 0) {
-
-            text += `⬇️ *DOWNLOAD LINKS*\n\n`;
-
-            data.downloads.forEach((dl, i) => {
-                text += `*${i + 1}.* ${dl.quality || "Quality"}\n`;
-                text += `📦 ${dl.size || "Unknown"}\n`;
-                text += `🔗 ${dl.url}\n\n`;
-            });
-
-        } else {
-            text += "❌ Download links naha";
+        if (!data.downloads || data.downloads.length === 0) {
+            return reply("❌ Download links naha");
         }
+
+        movieStore[sender] = data.downloads;
+
+        let text = `🎬 *${data.title}*\n\n`;
+        text += `⭐ Rating : ${data.rating || "N/A"}\n`;
+        text += `📅 Year : ${data.year || "N/A"}\n\n`;
+
+        text += `⬇️ *REPLY NUMBER TO DOWNLOAD*\n\n`;
+
+        data.downloads.forEach((dl, i) => {
+            text += `*${i + 1}.* ${dl.quality}\n`;
+            text += `📦 ${dl.size}\n\n`;
+        });
 
         await conn.sendMessage(from, {
             image: {
@@ -73,11 +70,44 @@ async (conn, mek, m, { from, q, reply }) => {
         }, { quoted: mek });
 
     } catch (e) {
+        console.log("ERROR =>", e);
+        reply("❌ API Error");
+    }
 
-        console.log("YTS ERROR :", e);
+});
 
-        reply("❌ API Error\n\nCheck console logs");
+cmd({
+    on: "text"
+},
+async (conn, mek, m, { from, body, sender }) => {
 
+    try {
+
+        if (!movieStore[sender]) return;
+
+        const num = parseInt(body);
+
+        if (isNaN(num)) return;
+
+        const downloads = movieStore[sender];
+
+        if (!downloads[num - 1]) return;
+
+        const selected = downloads[num - 1];
+
+        await conn.sendMessage(from, {
+            text:
+`🎥 *${selected.quality} DOWNLOAD*
+
+📦 Size : ${selected.size}
+
+🔗 ${selected.url}`
+        }, { quoted: mek });
+
+        delete movieStore[sender];
+
+    } catch (e) {
+        console.log(e);
     }
 
 });

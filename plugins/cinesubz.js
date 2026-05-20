@@ -2,34 +2,47 @@ const { cmd, replyHandlers } = require('../command');
 const axios = require('axios');
 
 const API_KEY = 'lakiya_6dfa6b43064dd56b5c71acb12fc9b30e4d88dd0deb19c8b14f897d12fc87b8e6';
-const BASE_URL = 'https://nexora.laksidunimsara.com/cinesubz';
+
+const SEARCH_BASE = 'https://nexora.laksidunimsara.com/cinesubz';
+const DOWNLOAD_BASE = 'https://new77777.vercel.app/movie/cinesubz';
 
 const movieReplies = {};
+const qualityReplies = {};
+
+/* =========================
+   SEARCH COMMAND
+========================= */
 
 cmd({
     pattern: "cinesubz",
-    alias: ["movie", "cs"],
+    alias: ["movie2", "cs"],
     react: "🎬",
     desc: "Search movies from Cinesubz",
-    category: "search",
+    category: "movie",
     filename: __filename
 },
-async (conn, mek, m, { from, q, reply, sender }) => {
+async (conn, mek, m, {
+    from,
+    q,
+    reply,
+    sender
+}) => {
 
     try {
 
         if (!q) {
             return reply(
-`🎬 Enter movie name
+`🎬 *Enter movie name*
 
 Example:
 .cs spider man`
             );
         }
 
-        // SEARCH API
+        /* SEARCH API */
+
         const searchUrl =
-`${BASE_URL}/search?query=${encodeURIComponent(q)}&api_key=${API_KEY}`;
+`${SEARCH_BASE}/search?query=${encodeURIComponent(q)}&api_key=${API_KEY}`;
 
         const res = await axios.get(searchUrl);
 
@@ -47,19 +60,25 @@ Example:
             return reply("❌ No movies found");
         }
 
-        // SAVE RESULTS
         movieReplies[sender] = results;
 
-        // SEND LIST
-        let txt = `🎬 *CINESUBZ SEARCH*\n\n`;
+        /* MOVIE LIST */
+
+        let txt =
+`╭━━〔 *CINESUBZ SEARCH* 〕━━⬣
+
+`;
 
         results.slice(0, 10).forEach((v, i) => {
 
-            txt += `*${i + 1}.* ${v.title || v.name || "Unknown"}\n`;
+            txt +=
+`*${i + 1}.* ${v.title || v.name || "Unknown"}\n`;
 
         });
 
         txt += `\n📌 Reply with movie number`;
+
+        txt += `\n╰━━━━━━━━━━━━━━⬣`;
 
         return reply(txt);
 
@@ -68,13 +87,11 @@ Example:
         console.log("SEARCH ERROR:", e);
 
         return reply("❌ Search Error");
-
     }
-
 });
 
 /* =========================
-   REPLY HANDLER
+   MOVIE SELECT
 ========================= */
 
 replyHandlers.push({
@@ -88,7 +105,12 @@ replyHandlers.push({
 
     },
 
-    function: async (conn, mek, m, { from, body, sender, reply }) => {
+    function: async (conn, mek, m, {
+        from,
+        body,
+        sender,
+        reply
+    }) => {
 
         try {
 
@@ -97,7 +119,7 @@ replyHandlers.push({
             const movies = movieReplies[sender];
 
             if (!movies || !movies[index]) {
-                return reply("❌ Invalid number");
+                return reply("❌ Invalid movie number");
             }
 
             const movie = movies[index];
@@ -123,141 +145,156 @@ replyHandlers.push({
                 movie.poster ||
                 'https://files.catbox.moe/5xryn5.jpg';
 
-            /* =========================
-               DETAILS API
-            ========================= */
+            /* DOWNLOAD API */
 
-            let details = {};
+            const dlUrl =
+`${DOWNLOAD_BASE}?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
 
-            try {
+            const dlres = await axios.get(dlUrl);
 
-                const detailsUrl =
-`${BASE_URL}/details?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
+            console.log(
+                JSON.stringify(dlres.data, null, 2)
+            );
 
-                const dres = await axios.get(detailsUrl);
+            let qualities = [];
 
-                details =
-                    dres.data.result ||
-                    dres.data.data ||
-                    dres.data ||
-                    {};
+            if (Array.isArray(dlres.data)) {
 
-            } catch (e) {
+                qualities = dlres.data;
 
-                console.log("DETAILS ERROR:", e);
+            } else if (dlres.data.result) {
 
+                qualities = dlres.data.result;
+
+            } else if (dlres.data.data) {
+
+                qualities = dlres.data.data;
             }
 
-            /* =========================
-               DOWNLOAD API
-            ========================= */
-
-            let links = [];
-
-            try {
-
-                const dlUrl =
-`${BASE_URL}/dl?url=${encodeURIComponent(movieUrl)}&api_key=${API_KEY}`;
-
-                const dlres = await axios.get(dlUrl, {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0'
-                    }
-                });
-
-                console.log("DOWNLOAD API:", dlres.data);
-
-                // RAW DATA
-                const raw =
-                    typeof dlres.data === "string"
-                    ? dlres.data
-                    : JSON.stringify(dlres.data);
-
-                // EXTRACT URLS
-                const found =
-                    raw.match(/https?:\/\/[^\s"'<>\\]+/g) || [];
-
-                // REMOVE DUPLICATES
-                links = [...new Set(found)];
-
-                // REMOVE API LINKS
-                links = links.filter(v =>
-                    !v.includes('/cinesubz/dl') &&
-                    !v.includes('/cinesubz/details') &&
-                    !v.includes('/cinesubz/search')
-                );
-
-            } catch (e) {
-
-                console.log("DOWNLOAD ERROR:", e);
-
+            if (
+                !Array.isArray(qualities) ||
+                qualities.length === 0
+            ) {
+                return reply("❌ No download links found");
             }
 
-            /* =========================
-               CAPTION
-            ========================= */
+            /* SAVE QUALITIES */
 
-            let caption =
-`╭━━〔 *CINESUBZ MOVIE* 〕━━⬣
-┃🎬 *Title:* ${title}
+            qualityReplies[sender] = {
+                title,
+                image,
+                data: qualities
+            };
+
+            /* QUALITY MESSAGE */
+
+            let txt =
+`╭━━〔 *${title}* 〕━━⬣
+
+📥 *AVAILABLE QUALITIES*
+
 `;
 
-            if (details.year)
-                caption += `┃📆 *Year:* ${details.year}\n`;
+            qualities.forEach((v, i) => {
 
-            if (details.imdb)
-                caption += `┃⭐ *IMDb:* ${details.imdb}\n`;
+                txt +=
+`*${i + 1}.* ${v.quality || v.label || "Movie"}\n`;
 
-            if (details.genre)
-                caption += `┃🎭 *Genre:* ${details.genre}\n`;
+            });
 
-            if (details.country)
-                caption += `┃🌍 *Country:* ${details.country}\n`;
+            txt += `\n📌 Reply with quality number`;
 
-            caption += `╰━━━━━━━━━━━━━━⬣\n\n`;
-
-            /* =========================
-               DOWNLOAD LINKS
-            ========================= */
-
-            if (links.length > 0) {
-
-                caption += `📥 *DOWNLOAD LINKS*\n\n`;
-
-                links.slice(0, 10).forEach((v, i) => {
-
-                    caption += `*${i + 1}.* Download Link\n`;
-                    caption += `🔗 ${v}\n\n`;
-
-                });
-
-            } else {
-
-                caption += `❌ No download links found`;
-
-            }
-
-            /* =========================
-               SEND
-            ========================= */
+            txt += `\n╰━━━━━━━━━━━━━━⬣`;
 
             await conn.sendMessage(
                 from,
                 {
                     image: { url: image },
-                    caption
+                    caption: txt
                 },
                 { quoted: mek }
             );
 
         } catch (e) {
 
-            console.log("MOVIE ERROR:", e);
+            console.log("MOVIE SELECT ERROR:", e);
 
             return reply("❌ Movie Fetch Error");
-
         }
-
     }
+});
 
+/* =========================
+   QUALITY SELECT
+========================= */
+
+replyHandlers.push({
+
+    filter: (text, { sender }) => {
+
+        return (
+            qualityReplies[sender] &&
+            !isNaN(text)
+        );
+
+    },
+
+    function: async (conn, mek, m, {
+        from,
+        body,
+        sender,
+        reply
+    }) => {
+
+        try {
+
+            const index = Number(body) - 1;
+
+            const data = qualityReplies[sender];
+
+            if (!data || !data.data[index]) {
+                return reply("❌ Invalid quality number");
+            }
+
+            const selected = data.data[index];
+
+            delete qualityReplies[sender];
+
+            const videoUrl =
+                selected.url ||
+                selected.link ||
+                selected.download;
+
+            if (!videoUrl) {
+                return reply("❌ Video link not found");
+            }
+
+            await reply("⬇️ Downloading movie...");
+
+            /* SEND VIDEO DOCUMENT */
+
+            await conn.sendMessage(
+                from,
+                {
+                    document: {
+                        url: videoUrl
+                    },
+                    mimetype: "video/mp4",
+                    fileName:
+`${data.title} - ${selected.quality || "Movie"}.mp4`,
+                    caption:
+`🎬 *${data.title}*
+
+📥 Quality: ${selected.quality || "Unknown"}`
+                },
+                { quoted: mek }
+            );
+
+        } catch (e) {
+
+            console.log("DOWNLOAD ERROR:", e);
+
+            return reply("❌ Download Error");
+        }
+    }
 });
